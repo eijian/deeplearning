@@ -1,0 +1,9 @@
+
+module Main where
+
+import CNN.Kernel
+
+main :: IO ()
+main = do
+  k <- mkKernel 3 12 12 0.4
+  putStrLn ("LEN: " ++ (show $ length k))
