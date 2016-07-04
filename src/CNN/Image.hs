@@ -28,8 +28,9 @@ isub (ax, ay) (bx, by) = (ax - bx, ay - by)
 
 -}
 
-type Pixel = [Double]
-type Image = M.Map Int Pixel    -- (X * Y)
+{-
+type Plain = [Double]
+type Image = M.Map Int Plain    -- (X * Y)
 
 loadImage :: String -> Int -> IO Image
 loadImage f c = do
@@ -42,4 +43,9 @@ loadImage f c = do
 
 split :: Int -> [Double] -> [Pixel]
 split c dt = 
-  
+-}
+
+type Plain = [Double]    -- X x Y pixels
+type Image = [Plain]     -- n dimension
+
+type Class = [Double]    -- teacher vector
