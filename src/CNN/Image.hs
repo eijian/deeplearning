@@ -45,7 +45,7 @@ split :: Int -> [Double] -> [Pixel]
 split c dt = 
 -}
 
-type Plain = [Double]    -- X x Y pixels
+type Plain = [[Double]]    -- 2D: X x Y pixels
 type Image = [Plain]     -- n dimension
 
 type Class = [Double]    -- teacher vector

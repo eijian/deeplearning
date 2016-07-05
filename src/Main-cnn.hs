@@ -28,8 +28,8 @@ n_out = k
 epochs = 500
 opStep = 5
 epoch0 = 1
---batch  = 150
-batch  = 35
+batch  = 150
+--batch  = 35
 
 learning_rate = 0.1
 
@@ -40,19 +40,21 @@ main :: IO ()
 main = do
   sampleT <- initSamplePool 1 (12, 12) 3 0.95 150
   sampleE <- initSamplePool 1 (12, 12) 3 0.90 30
-  let layers = NopLayer
+  let layers = [NopLayer, ActLayer relu]
   forM_ [epoch0 .. (epoch0 + epochs - 1)] $ \i -> do
     let ns  = nSample sampleT
-        off = (i-1)*batch `mod` ns
+        off = (i-1) * batch `mod` ns
     teachers <- getImages sampleT off batch
     let (im, cl) = unzip teachers
     ops <- mapM (learn layers) im
     if i `mod` opStep == 0 then putStatus i ops else putStr ""
 
-learn :: Layer l => l -> Image -> IO [Image]
-learn l i = do
-  let op = forward l [i]
-  return op 
+learn :: [Layer] -> Image -> IO [Image]
+learn [] i = do
+  return [i]
+learn (l:ls) i = do
+  i' <- learn ls i
+  return $ forward l i'
 
 putStatus :: Int -> [[Image]] -> IO ()
 putStatus i ims = do

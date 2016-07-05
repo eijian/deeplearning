@@ -29,7 +29,7 @@ initSamplePool c (sx, sy) o p n = do
           a <- pixel p'
           return a
         return s3
-      return $ concat s2
+      return s2
     e1 <- forM [0..(o-1)] $ \j -> do
       return $ if i `mod` o == j then 1.0 else 0.0
     return (s1, e1)
