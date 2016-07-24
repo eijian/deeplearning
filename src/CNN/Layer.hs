@@ -3,20 +3,18 @@
 
 module CNN.Layer where
 
+import CNN.LayerType
+
 import CNN.Image
-
-type ActFunc = Double -> Double
-
-relu :: ActFunc
-relu a = if a > 0.0 then a else 0.0
-
-data Layer = NopLayer
-           | ActLayer ActFunc
-           | MaxPoolLayer Int
-
+import CNN.ActLayer
+import CNN.PoolLayer
+import CNN.ConvLayer
 
 forward :: Layer -> [Image] -> [Image]
+forward _ [] = []
 forward NopLayer i = i
-forward (ActLayer f) (i:is) = (map (map (map f)) i):i:is
+forward l@(ActLayer f) im@(i:is)     = (activate l i):im
+forward l@(MaxPoolLayer s) im@(i:is) = (poolMax l i):im
+forward l@(ConvLayer s fs) im@(i:is)    = (convolve s fs i):im
 
 
