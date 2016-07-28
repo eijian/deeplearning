@@ -3,15 +3,19 @@
 module CNN.LayerType where
 
 -- for Activation Layer
-type ActFunc = Double -> Double
+type ActFunc = [Double] -> [Double]
 
--- for Convolution Layer
+-- filter for Convolution Layer
 type Kernel = [[Double]]
 type Bias   = Double
-type Filter = (Kernel, Bias)
+type FilterC = (Kernel, Bias)
+
+-- filter for Hidden Layer
+type FilterH = [Double]
 
 data Layer = NopLayer
            | ActLayer ActFunc
            | MaxPoolLayer Int
-           | ConvLayer Int [Filter]
+           | ConvLayer Int [FilterC]
+           | HiddenLayer [FilterH]
 

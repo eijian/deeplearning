@@ -12,7 +12,7 @@ import CNN.LayerType
 import CNN.Image
 
 {- |
-  initFilter
+  initFilterC
 
   IN: #kernel
       #channel
@@ -21,8 +21,8 @@ import CNN.Image
       pool size (m * m)
 -}
 
-initFilter :: Int -> Int -> Int -> Int -> Int -> Int -> IO [Filter]
-initFilter k c x y n m = do
+initFilterC :: Int -> Int -> Int -> Int -> Int -> Int -> IO [FilterC]
+initFilterC k c x y n m = do
   f <- forM [1..k] $ \i -> do
     w <- initKernel c n
     return (w, 0.0)
@@ -51,17 +51,17 @@ convolve
       image
 
 test: filter k=3, c=2, s=2
->>> let filter = [([[1.0,2.0,3.0,4.0],[5.0,6.0,7.0,8.0]],0.25),([[3.0,4.0,5.0,6.0],[7.0,8.0,1.0,2.0]],0.5),([[5.0,6.0,7.0,8.0],[1.0,2.0,3.0,4.0]],0.75)] :: [Filter]
+>>> let filter = [([[1.0,2.0,3.0,4.0],[5.0,6.0,7.0,8.0]],0.25),([[3.0,4.0,5.0,6.0],[7.0,8.0,1.0,2.0]],0.5),([[5.0,6.0,7.0,8.0],[1.0,2.0,3.0,4.0]],0.75)] :: [FilterC]
 >>> let img = [[[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]],[[4.0,5.0,6.0],[7.0,8.0,9.0],[1.0,2.0,3.0]]] :: Image
 >>> convolve 2 filter img
 [[[200.25,236.25],[173.25,209.25]],[[152.5,188.5],[233.5,269.5]],[[152.75,188.75],[197.75,233.75]]]
 
 -}
 
-convolve :: Int -> [Filter] -> Image -> Image
+convolve :: Int -> [FilterC] -> Image -> Image
 convolve s fs im = map (convolveImage s im) fs
 
-convolveImage :: Int -> Image -> Filter -> Plain
+convolveImage :: Int -> Image -> FilterC -> Plain
 convolveImage s im (ks, b) = sumPlains b (zipWith (convolvePlain s) ks im)
 
 sumPlains :: Double -> [Plain] -> Plain
@@ -127,7 +127,7 @@ convolveLine s k ps
 --    im' = map (convolve' f im (offset cl)) (scanPx cl)
 
 
-convolve' :: [Filter] -> Image -> [Int] -> Int -> Pixel
+convolve' :: [FilterC] -> Image -> [Int] -> Int -> Pixel
 convolve' f im o s = convolvePx f px
   where
     px = mapMaybe (\x -> M.lookup x im) $ map (s +) o
