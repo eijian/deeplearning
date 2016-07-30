@@ -20,8 +20,8 @@ initFilterH
 initFilterH :: Int -> Int -> IO [FilterH]
 initFilterH k c = do
   f <- forM [1..k] $ \i -> do
-    k <- initKernel c
-    return k
+    f' <- initKernel c
+    return f'
   return f
   where
     a = 1.0 / fromIntegral c
@@ -48,6 +48,8 @@ connect
 -}
 
 connect :: [FilterH] -> Image -> Image
+connect [] _ = error "invalid FilterH"
+connect _ [] = error "invalid Image"
 connect fs [[im]] = [[map (dot im) fs]]
   where
     dot :: [Double] -> [Double] -> Double

@@ -2,6 +2,7 @@
 
 module CNN.ConvLayer where
 
+import Debug.Trace
 import Control.Monad
 import Data.List
 import qualified Data.Map as M
@@ -52,8 +53,11 @@ convolve
 
 test: filter k=3, c=2, s=2
 >>> let filter = [([[1.0,2.0,3.0,4.0],[5.0,6.0,7.0,8.0]],0.25),([[3.0,4.0,5.0,6.0],[7.0,8.0,1.0,2.0]],0.5),([[5.0,6.0,7.0,8.0],[1.0,2.0,3.0,4.0]],0.75)] :: [FilterC]
->>> let img = [[[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]],[[4.0,5.0,6.0],[7.0,8.0,9.0],[1.0,2.0,3.0]]] :: Image
->>> convolve 2 filter img
+>>> let img1 = [[[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]],[[4.0,5.0,6.0],[7.0,8.0,9.0],[1.0,2.0,3.0]]] :: Image
+>>> let img2 = [[[1.0,2.0,3.0,4.0],[4.0,5.0,6.0,7.0],[7.0,8.0,9.0,10.0],[10.0,11.0,12.0,13.0]],[[4.0,5.0,6.0,7.0],[7.0,8.0,9.0,10.0],[1.0,2.0,3.0,4.0],[4.0,5.0,6.0,7.0]]] :: Image
+>>> convolve 2 filter img2
+[]
+>>> convolve 2 filter img1
 [[[200.25,236.25],[173.25,209.25]],[[152.5,188.5],[233.5,269.5]],[[152.75,188.75],[197.75,233.75]]]
 
 -}
@@ -65,7 +69,7 @@ convolveImage :: Int -> Image -> FilterC -> Plain
 convolveImage s im (ks, b) = sumPlains b (zipWith (convolvePlain s) ks im)
 
 sumPlains :: Double -> [Plain] -> Plain
-sumPlains b [] = [repeat b, repeat b]  -- 2 Dimensions (X*Y)
+sumPlains b [] = repeat $ repeat b  -- 2 Dimensions (X*Y)
 sumPlains b (p:ps) = zipWith f p (sumPlains b ps)
   where
     f :: [Double] -> [Double] -> [Double]

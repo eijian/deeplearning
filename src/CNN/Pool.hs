@@ -45,21 +45,21 @@ pixel p = do
 
 {-
   pool
-  offset
-  #image
+  #epoch
+  batch
 -}
 
 getImages :: MemPool -> Int -> Int -> IO [(Image, Class)]
-getImages p o n = do
-  let im0 = mapMaybe (\x -> M.lookup x p) [o..mx1]
+getImages p e b = do
+  let s = nSample p
+      o = (e-1) * b `mod` s
+      mx0 = o + b - 1
+      mx2 = mx0 - s
+      mx1 = if mx2 < 0 then mx0 else s - 1
+      im0 = mapMaybe (\x -> M.lookup x p) [o..mx1]
       im1 = mapMaybe (\x -> M.lookup x p) [0..mx2]
   --putStrLn (show psize ++ "/" ++ show o ++ "/" ++ show mx1 ++ "/" ++ show mn2 ++ "/" ++ show mx2)
   return (im0 ++ im1)
-  where
-    psize = nSample p
-    mx0 = o + n - 1
-    mx2 = mx0 - psize
-    mx1 = if mx2 < 0 then mx0 else psize - 1
   
 nSample :: MemPool -> Int
 nSample p = M.size p

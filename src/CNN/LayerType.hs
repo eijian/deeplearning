@@ -2,6 +2,8 @@
 
 module CNN.LayerType where
 
+import CNN.Image
+
 -- for Activation Layer
 type ActFunc = [Double] -> [Double]
 
@@ -18,4 +20,6 @@ data Layer = NopLayer
            | MaxPoolLayer Int
            | ConvLayer Int [FilterC]
            | HiddenLayer [FilterH]
+           | FlattenLayer (Image -> Image)
+
 
