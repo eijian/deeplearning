@@ -3,6 +3,7 @@
 module Main where
 
 import Control.Monad
+import Data.Time
 import Debug.Trace
 
 import CNN.Image
@@ -33,8 +34,8 @@ n_hidden     = 20
 n_out = k
 
 --epochs = 500
-epochs = 1
-opStep = 1
+epochs = 10
+opStep = 5
 epoch0 = 1
 batch  = 150
 --batch  = 10
@@ -45,8 +46,10 @@ learning_rate = 0.1
 
 main :: IO ()
 main = do
-  sampleT <- initSamplePool 1 (12, 12) 3 0.95 150
-  sampleE <- initSamplePool 1 (12, 12) 3 0.90 30
+  putStrLn "Building the model..."
+  poolT <- initSamplePool 1 (12, 12) 3 0.95 train_N
+  poolE <- initSamplePool 1 (12, 12) 3 0.90 test_N
+  sampleE <- getImages poolE 1 test_N
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
@@ -60,26 +63,46 @@ main = do
                 HiddenLayer fh2, ActLayer softmax]
       is = [epoch0 .. (epoch0 + epochs - 1)]
 
-  loop is layers batch sampleT
+  putStrLn "Training the model..."
+  putStatus 0 [([0.0], 0.0)] layers
+  loop is layers batch poolT sampleE
 
+  putStrLn "Finished!"
 
-loop :: [Int] -> [Layer] -> Int -> MemPool -> IO ()
-loop [] _ _ _ = putStrLn "finished!"
-loop (i:is) ls b p = do
-  teachers <- getImages p i b
+{- |
+loop
+
+  IN: epoch numbers
+      layers
+      batch size
+      pool of teacher data
+      sample of evaluation
+
+-}
+
+loop :: [Int] -> [Layer] -> Int -> MemPool -> [(Image, Class)] -> IO ()
+loop [] _ _ _ _ = putStr ""
+loop (i:is) ls b pt se = do
+  teachers <- getImages pt i b
   ops <- mapM (train ls) teachers
-  let (output, dls) = unzip ops
+  let (_, dls) = unzip ops
       ls' = updateLayer ls dls   -- dls = diff of layers
-  if i `mod` opStep == 0 then putStatus i output ls' else putStr ""
-  loop is ls' b p
+  if i `mod` opStep == 0 then putStatus i (evaluate ls' se) ls'
+                         else putStr ""
+  loop is ls' b pt se
 
-putStatus :: Int -> [Image] -> [Layer] -> IO ()
-putStatus i ims ls = do
-  putStrLn ("iter " ++ show (epoch0 + i - 1) ++
-                "/" ++ show (epoch0 + epochs - 1))
-  mapM_ (putOne) ims
+putStatus :: Int -> [([Double], Double)] -> [Layer] -> IO ()
+putStatus i rs ls = do
+  let (_, rt) = unzip rs
+  tm <- getCurrentTime
+  putStrLn ("iter = " ++ show (epoch0 + i - 1) ++
+            "/"     ++ show (epoch0 + epochs - 1) ++
+            " time = " ++ (formatTime defaultTimeLocale "%H:%M:%S" tm) ++
+            " ratio = " ++ show (sum rt / fromIntegral (length rt)))
+  --mapM_ (putOne) rs
   where
-    putOne :: Image -> IO ()
-    putOne im = putStrLn $ show im
+    putOne :: ([Double], Double) -> IO ()
+    putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
+
 
 
