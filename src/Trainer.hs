@@ -19,7 +19,7 @@ train :: [Layer] -> (Image, Class) -> IO (Image, [Layer])
 train [] (i, c) = return (i, [])
 train ls (i, c) = do
   let op  = forwardProp ls [i]
-      ls' = ls
+      ls' = backwordProp ls op
   return (head op, ls')
 
 
@@ -34,4 +34,11 @@ evaluate ls (s:ss) = (op, rt):(evaluate ls ss)
 forwardProp :: [Layer] -> [Image] -> [Image]
 forwardProp [] is = is
 forwardProp (l:ls) is = forwardProp ls (forward l is)
-  
+
+
+backwordProp :: [Layer] -> [Image] -> [Layer]
+backwordProp [] _ = []
+backwordProp ls [] = ls
+backwordProp ls op = ls
+
+

@@ -34,7 +34,7 @@ n_hidden     = 20
 n_out = k
 
 --epochs = 500
-epochs = 10
+epochs = 200
 opStep = 5
 epoch0 = 1
 batch  = 150
@@ -64,8 +64,9 @@ main = do
       is = [epoch0 .. (epoch0 + epochs - 1)]
 
   putStrLn "Training the model..."
-  putStatus 0 [([0.0], 0.0)] layers
-  loop is layers batch poolT sampleE
+  tm0 <- getCurrentTime
+  putStatus 0 tm0 [([0.0], 0.0)] layers
+  loop is tm0 layers batch poolT sampleE
 
   putStrLn "Finished!"
 
@@ -80,24 +81,26 @@ loop
 
 -}
 
-loop :: [Int] -> [Layer] -> Int -> MemPool -> [(Image, Class)] -> IO ()
-loop [] _ _ _ _ = putStr ""
-loop (i:is) ls b pt se = do
+loop :: [Int] -> UTCTime -> [Layer] -> Int -> MemPool -> [(Image, Class)]
+     -> IO ()
+loop [] _ _ _ _ _ = putStr ""
+loop (i:is) tm0 ls b pt se = do
   teachers <- getImages pt i b
   ops <- mapM (train ls) teachers
   let (_, dls) = unzip ops
       ls' = updateLayer ls dls   -- dls = diff of layers
-  if i `mod` opStep == 0 then putStatus i (evaluate ls' se) ls'
+  if i `mod` opStep == 0 then putStatus i tm0 (evaluate ls' se) ls'
                          else putStr ""
-  loop is ls' b pt se
+  loop is tm0 ls' b pt se
 
-putStatus :: Int -> [([Double], Double)] -> [Layer] -> IO ()
-putStatus i rs ls = do
+putStatus :: Int -> UTCTime -> [([Double], Double)] -> [Layer] -> IO ()
+putStatus i tm0 rs ls = do
   let (_, rt) = unzip rs
   tm <- getCurrentTime
   putStrLn ("iter = " ++ show (epoch0 + i - 1) ++
             "/"     ++ show (epoch0 + epochs - 1) ++
-            " time = " ++ (formatTime defaultTimeLocale "%H:%M:%S" tm) ++
+         --   " time = " ++ (formatTime defaultTimeLocale "%H:%M:%S" tm) ++
+            " time = " ++ (show $ diffUTCTime tm tm0) ++
             " ratio = " ++ show (sum rt / fromIntegral (length rt)))
   --mapM_ (putOne) rs
   where
