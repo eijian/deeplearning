@@ -47,11 +47,12 @@ initSamplePool
 initSamplePool :: Int -> (Int, Int) -> Int -> Double -> Int -> IO MemPool
 initSamplePool c (sx, sy) o p n = do
   s0 <- forM [0..(n-1)] $ \i -> do
+    let cl = i `mod` o  -- class of this image
 
     -- Image data
     s1 <- forM [1..c] $ \j -> do
       s2 <- forM [0..(sy-1)] $ \y -> do
-        let p' = if y `div` st == i `mod` o then p else (1-p)
+        let p' = if y `div` st == cl then p else (1-p)
         s3 <- forM [1..sx] $ \x -> do
           a <- pixel p'
           return a
@@ -60,7 +61,7 @@ initSamplePool c (sx, sy) o p n = do
 
     -- Teacher data
     e1 <- forM [0..(o-1)] $ \j -> do
-      return $ if i `mod` o == j then 1.0 else 0.0
+      return $ if j == cl then 1.0 else 0.0
     return (s1, e1)
 
   return (MemPool (Map.fromList $ zip [0..] s0))
