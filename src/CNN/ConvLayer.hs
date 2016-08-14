@@ -1,6 +1,11 @@
+--
+-- ConvLayer : convolution layer
+--
 
-
-module CNN.ConvLayer where
+module CNN.ConvLayer (
+  initFilterC
+, convolve
+) where
 
 import Debug.Trace
 import Control.Monad
@@ -124,33 +129,3 @@ convolveLine s k ps
     vs = concat $ map (take s) ps
     ps' = map (tail) ps
 
-{-
-
---convolve cl f im = M.fromList $ zip [0..(length im - 1)] im'
---  where
---    im' = map (convolve' f im (offset cl)) (scanPx cl)
-
-
-convolve' :: [FilterC] -> Image -> [Int] -> Int -> Pixel
-convolve' f im o s = convolvePx f px
-  where
-    px = mapMaybe (\x -> M.lookup x im) $ map (s +) o
-
--- loop of n kernel
-convolvePx :: [(Kernel, Bias)] -> [Pixel] -> Pixel
-convolvePx [] _ = []
-convolvePx (wb:wbs) ps = (a:convolvePx wbs ps)
-  where
-    w = fst wb
-    b = snd wb
-    a = dot w ps + b
-
-dot :: Kernel -> [Pixel] -> Double
-dot [] _ = 0.0
-dot _ [] = 0.0
-dot (k:ks) (p:ps) = (dot' k p) + dot ks ps
-  where
-    dot' :: [Double] -> Pixel -> Double
-    dot' k p = sum $ zipWith (*) k p
-
--}

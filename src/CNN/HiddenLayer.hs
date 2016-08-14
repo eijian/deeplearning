@@ -1,7 +1,11 @@
+--
+-- HiddenLayer : hidden layer (fully connected layer)
+--
 
-
-
-module CNN.HiddenLayer where
+module CNN.HiddenLayer (
+  initFilterH
+, connect
+) where
 
 import Control.Monad
 import System.Random.Mersenne as MT
@@ -54,6 +58,3 @@ connect fs [[im]] = [[map (dot im) fs]]
   where
     dot :: [Double] -> [Double] -> Double
     dot im f = sum $ zipWith (*) (1.0:im) f
-
-
-

@@ -1,9 +1,13 @@
+--
+-- ActLayer: activate layer
+--
 
+module CNN.ActLayer (
+  relu
+, softmax
+, activate
+) where
 
-
-module CNN.ActLayer where
-
---import {-# SOURCE #-} CNN.Layer
 import CNN.LayerType
 import CNN.Image
 

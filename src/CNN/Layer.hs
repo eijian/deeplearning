@@ -1,7 +1,11 @@
+--
+-- Layer : layer definition
+--
 
-
-
-module CNN.Layer where
+module CNN.Layer (
+  forward
+, updateLayer
+) where
 
 import Debug.Trace
 import CNN.LayerType
@@ -21,7 +25,6 @@ forward l@(MaxPoolLayer s) im@(i:is) = (poolMax l i):im
 forward l@(ConvLayer s fs) im@(i:is) = (convolve s fs i):im
 forward l@(HiddenLayer fs) im@(i:is) = (connect fs i):im
 forward l@(FlattenLayer f) im@(i:is) = (f i):im
-
 
 updateLayer :: [Layer] -> [[Layer]] -> [Layer]
 updateLayer ls [] = ls

@@ -81,7 +81,7 @@ loop
 
 -}
 
-loop :: [Int] -> UTCTime -> [Layer] -> Int -> MemPool -> [(Image, Class)]
+loop :: [Int] -> UTCTime -> [Layer] -> Int -> MemPool -> [Teacher]
      -> IO ()
 loop [] _ _ _ _ _ = putStr ""
 loop (i:is) tm0 ls b pt se = do

@@ -15,7 +15,7 @@ import CNN.HiddenLayer
 
 
 
-train :: [Layer] -> (Image, Class) -> IO (Image, [Layer])
+train :: [Layer] -> Teacher -> IO (Image, [Layer])
 train [] (i, c) = return (i, [])
 train ls (i, c) = do
   let op  = forwardProp ls [i]
@@ -24,7 +24,7 @@ train ls (i, c) = do
 
 
 
-evaluate :: [Layer] -> [(Image, Class)] -> [([Double], Double)]
+evaluate :: [Layer] -> [Teacher] -> [([Double], Double)]
 evaluate _ [] = []
 evaluate ls (s:ss) = (op, rt):(evaluate ls ss)
   where
