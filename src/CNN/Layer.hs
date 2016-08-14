@@ -15,7 +15,7 @@ import CNN.ActLayer
 import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.HiddenLayer
-import CNN.FlattenLayer
+--import CNN.FlattenLayer
 
 forward :: Layer -> [Image] -> [Image]
 forward _ [] = []
