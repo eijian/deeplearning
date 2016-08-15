@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                deeplearning
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            Deep learning Trial
 -- description:         
 homepage:            https://github.com/eijian/deeplearning
@@ -16,8 +16,8 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
-executable deeplearning
-  main-is:             Main-cnn.hs
+executable train
+  main-is:             Main-train.hs
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
