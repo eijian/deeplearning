@@ -15,7 +15,7 @@ import CNN.Pool
 import CNN.LayerType
 import CNN.Layer
 import CNN.ActLayer
---import CNN.PoolLayer
+import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.HiddenLayer
 

@@ -8,17 +8,9 @@ module Trainer (
 ) where
 
 import Control.Monad
---import CNN.Cnn
 import CNN.Image
-import CNN.Pool
 import CNN.LayerType
 import CNN.Layer
-import CNN.ActLayer
-import CNN.PoolLayer
-import CNN.ConvLayer
-import CNN.HiddenLayer
-
-
 
 train :: [Layer] -> Trainer -> IO (Image, [Layer])
 train [] (i, c) = return (i, [])
