@@ -1,6 +1,11 @@
+--
+-- Trainer : train supervised dataset
+--
 
-
-module Trainer where
+module Trainer (
+  train
+, evaluate
+) where
 
 import Control.Monad
 --import CNN.Cnn
@@ -15,7 +20,7 @@ import CNN.HiddenLayer
 
 
 
-train :: [Layer] -> Teacher -> IO (Image, [Layer])
+train :: [Layer] -> Trainer -> IO (Image, [Layer])
 train [] (i, c) = return (i, [])
 train ls (i, c) = do
   let op  = forwardProp ls [i]
@@ -24,7 +29,7 @@ train ls (i, c) = do
 
 
 
-evaluate :: [Layer] -> [Teacher] -> [([Double], Double)]
+evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
 evaluate _ [] = []
 evaluate ls (s:ss) = (op, rt):(evaluate ls ss)
   where

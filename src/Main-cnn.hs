@@ -1,6 +1,10 @@
+--
+-- CNN : filter generator
+--
 
-
-module Main where
+module Main (
+  main
+) where
 
 import Control.Monad
 import Data.Time
@@ -81,7 +85,7 @@ loop
 
 -}
 
-loop :: Pool p => [Int] -> UTCTime -> [Layer] -> Int -> p -> [Teacher]
+loop :: Pool p => [Int] -> UTCTime -> [Layer] -> Int -> p -> [Trainer]
      -> IO ()
 loop [] _ _ _ _ _ = putStr ""
 loop (i:is) tm0 ls b pt se = do

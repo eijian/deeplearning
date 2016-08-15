@@ -6,7 +6,7 @@ module CNN.Image (
   Image
 , Plain
 , Class
-, Teacher
+, Trainer
 , flatten
 , unflatten  
 ) where
@@ -18,7 +18,7 @@ type Image = [Plain]     -- n dimension
 
 type Class = [Double]    -- teacher vector
 
-type Teacher = (Image, Class)
+type Trainer = (Image, Class)
 
 {- |
 flattenImage

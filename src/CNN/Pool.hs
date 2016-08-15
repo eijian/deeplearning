@@ -23,7 +23,7 @@ class Pool p where
          #epoch
          batch size
   -}
-  getImages :: p -> Int -> Int -> IO [Teacher]
+  getImages :: p -> Int -> Int -> IO [Trainer]
   {-
   nSample
     IN : pool
@@ -33,7 +33,7 @@ class Pool p where
 ---- IMAGE POOL ON MEMORY ----
 ------------------------------
 
-newtype MemPool = MemPool { m :: Map.Map Int Teacher }
+newtype MemPool = MemPool { m :: Map.Map Int Trainer }
 
 {-
 initSamplePool
@@ -59,7 +59,7 @@ initSamplePool c (sx, sy) o p n = do
         return s3
       return s2
 
-    -- Teacher data
+    -- Trainer data
     e1 <- forM [0..(o-1)] $ \j -> do
       return $ if j == cl then 1.0 else 0.0
     return (s1, e1)
