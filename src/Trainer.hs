@@ -27,23 +27,10 @@ train ls (i, c) = do
       ls' = backwordProp ls op
   return (head op, ls')
 
-
-
 evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
 evaluate _ [] = []
 evaluate ls (s:ss) = (op, rt):(evaluate ls ss)
   where
     op = head $ head (head $ forwardProp ls [fst s])
     rt = sum $ zipWith (*) (snd s) op
-
-forwardProp :: [Layer] -> [Image] -> [Image]
-forwardProp [] is = is
-forwardProp (l:ls) is = forwardProp ls (forward l is)
-
-
-backwordProp :: [Layer] -> [Image] -> [Layer]
-backwordProp [] _ = []
-backwordProp ls [] = ls
-backwordProp ls op = ls
-
 

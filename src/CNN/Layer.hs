@@ -3,7 +3,8 @@
 --
 
 module CNN.Layer (
-  forward
+  forwardProp
+, backwordProp
 , updateLayer
 ) where
 
@@ -16,6 +17,16 @@ import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.HiddenLayer
 --import CNN.FlattenLayer
+
+forwardProp :: [Layer] -> [Image] -> [Image]
+forwardProp [] is = is
+forwardProp (l:ls) is = forwardProp ls (forward l is)
+
+backwordProp :: [Layer] -> [Image] -> [Layer]
+backwordProp [] _ = []
+backwordProp ls [] = ls
+backwordProp ls op = ls
+
 
 forward :: Layer -> [Image] -> [Image]
 forward _ [] = []
