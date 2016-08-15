@@ -60,12 +60,19 @@ main = do
   fh1 <- initFilterH n_hidden 800
   fh2 <- initFilterH n_out n_hidden
 
-  let layers = [ConvLayer 3 fc1, ActLayer relu, MaxPoolLayer 2,
-                ConvLayer 2 fc2, ActLayer relu, MaxPoolLayer 2,
-                FlattenLayer flatten,
-                HiddenLayer fh1, ActLayer relu,
-                HiddenLayer fh2, ActLayer softmax]
-      is = [epoch0 .. (epoch0 + epochs - 1)]
+  let is = [epoch0 .. (epoch0 + epochs - 1)]
+      layers = [ConvLayer 3 fc1
+              , ActLayer relu
+              , MaxPoolLayer 2
+              , ConvLayer 2 fc2
+              , ActLayer relu
+              , MaxPoolLayer 2
+              , FlattenLayer flatten
+              , HiddenLayer fh1
+              , ActLayer relu
+              , HiddenLayer fh2
+              , ActLayer softmax
+              ]
 
   putStrLn "Training the model..."
   tm0 <- getCurrentTime
@@ -103,10 +110,8 @@ putStatus i tm0 rs ls = do
   tm <- getCurrentTime
   putStrLn ("iter = " ++ show (epoch0 + i - 1) ++
             "/"     ++ show (epoch0 + epochs - 1) ++
-         --   " time = " ++ (formatTime defaultTimeLocale "%H:%M:%S" tm) ++
             " time = " ++ (show $ diffUTCTime tm tm0) ++
             " ratio = " ++ show (sum rt / fromIntegral (length rt)))
-  --mapM_ (putOne) rs
   where
     putOne :: ([Double], Double) -> IO ()
     putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
