@@ -12,12 +12,12 @@ import CNN.Image
 import CNN.LayerType
 import CNN.Layer
 
-train :: [Layer] -> Trainer -> IO (Image, [Layer])
-train [] (i, c) = return (i, [])
-train ls (i, c) = do
-  let op  = forwardProp ls [i]
-      ls' = backwordProp ls op
-  return (head op, ls')
+train :: [Layer] -> Trainer -> (Image, [Layer])
+train [] (i, c) = (i, [])
+train ls (i, c) = (head op, ls')
+  where
+    op  = forwardProp ls [i]
+    ls' = backwordProp ls op
 
 evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
 evaluate _ [] = []

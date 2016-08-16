@@ -57,7 +57,7 @@ main = do
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
-  fh1 <- initFilterH n_hidden 800
+  fh1 <- initFilterH n_hidden (2*2*20)
   fh2 <- initFilterH n_out n_hidden
 
   let is = [epoch0 .. (epoch0 + epochs - 1)]
@@ -97,8 +97,8 @@ loop :: Pool p => [Int] -> UTCTime -> [Layer] -> Int -> p -> [Trainer]
 loop [] _ _ _ _ _ = putStr ""
 loop (i:is) tm0 ls b pt se = do
   teachers <- getImages pt i b
-  ops <- mapM (train ls) teachers
-  let (_, dls) = unzip ops
+  let ops = map (train ls) teachers
+      (_, dls) = unzip ops
       ls' = updateLayer ls dls   -- dls = diff of layers
   if i `mod` opStep == 0 then putStatus i tm0 (evaluate ls' se) ls'
                          else putStr ""
