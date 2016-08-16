@@ -57,7 +57,7 @@ main = do
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
-  fh1 <- initFilterH n_hidden 800
+  fh1 <- initFilterH n_hidden (2*2*20)
   fh2 <- initFilterH n_out n_hidden
 
   let layers = [ConvLayer 3 fc1, ActLayer relu, MaxPoolLayer 2,
