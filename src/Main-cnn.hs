@@ -1,6 +1,10 @@
+--
+-- CNN : filter generator
+--
 
-
-module Main where
+module Main (
+  main
+) where
 
 import Control.Monad
 import Data.Time
@@ -11,7 +15,7 @@ import CNN.Pool
 import CNN.LayerType
 import CNN.Layer
 import CNN.ActLayer
---import CNN.PoolLayer
+import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.HiddenLayer
 
@@ -53,7 +57,7 @@ main = do
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
-  fh1 <- initFilterH n_hidden 800
+  fh1 <- initFilterH n_hidden (2*2*20)
   fh2 <- initFilterH n_out n_hidden
 
   let layers = [ConvLayer 3 fc1, ActLayer relu, MaxPoolLayer 2,
@@ -81,7 +85,7 @@ loop
 
 -}
 
-loop :: [Int] -> UTCTime -> [Layer] -> Int -> MemPool -> [(Image, Class)]
+loop :: Pool p => [Int] -> UTCTime -> [Layer] -> Int -> p -> [Trainer]
      -> IO ()
 loop [] _ _ _ _ _ = putStr ""
 loop (i:is) tm0 ls b pt se = do

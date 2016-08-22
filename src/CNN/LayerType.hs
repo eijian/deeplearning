@@ -1,6 +1,16 @@
+--
+-- LayerType : layer types
+--
 
-
-module CNN.LayerType where
+module CNN.LayerType (
+  ActFunc
+, Kernel
+, Bias
+, FilterC
+, FilterH
+, Layer ( NopLayer, ActLayer, MaxPoolLayer, ConvLayer, HiddenLayer
+        , FlattenLayer)
+) where
 
 import CNN.Image
 

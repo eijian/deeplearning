@@ -1,6 +1,10 @@
+--
+-- PoolLayer : pooling layer
+--
 
-
-module CNN.PoolLayer where
+module CNN.PoolLayer (
+  poolMax
+) where
 
 import CNN.LayerType
 import CNN.Image

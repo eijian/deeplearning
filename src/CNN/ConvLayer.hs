@@ -1,6 +1,11 @@
+--
+-- ConvLayer : convolution layer
+--
 
-
-module CNN.ConvLayer where
+module CNN.ConvLayer (
+  initFilterC
+, convolve
+) where
 
 import Debug.Trace
 import Control.Monad
@@ -55,10 +60,10 @@ test: filter k=3, c=2, s=2
 >>> let filter = [([[1.0,2.0,3.0,4.0],[5.0,6.0,7.0,8.0]],0.25),([[3.0,4.0,5.0,6.0],[7.0,8.0,1.0,2.0]],0.5),([[5.0,6.0,7.0,8.0],[1.0,2.0,3.0,4.0]],0.75)] :: [FilterC]
 >>> let img1 = [[[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]],[[4.0,5.0,6.0],[7.0,8.0,9.0],[1.0,2.0,3.0]]] :: Image
 >>> let img2 = [[[1.0,2.0,3.0,4.0],[4.0,5.0,6.0,7.0],[7.0,8.0,9.0,10.0],[10.0,11.0,12.0,13.0]],[[4.0,5.0,6.0,7.0],[7.0,8.0,9.0,10.0],[1.0,2.0,3.0,4.0],[4.0,5.0,6.0,7.0]]] :: Image
->>> convolve 2 filter img2
-[]
 >>> convolve 2 filter img1
 [[[200.25,236.25],[173.25,209.25]],[[152.5,188.5],[233.5,269.5]],[[152.75,188.75],[197.75,233.75]]]
+>>> convolve 2 filter img2
+[]
 
 -}
 
@@ -124,33 +129,3 @@ convolveLine s k ps
     vs = concat $ map (take s) ps
     ps' = map (tail) ps
 
-{-
-
---convolve cl f im = M.fromList $ zip [0..(length im - 1)] im'
---  where
---    im' = map (convolve' f im (offset cl)) (scanPx cl)
-
-
-convolve' :: [FilterC] -> Image -> [Int] -> Int -> Pixel
-convolve' f im o s = convolvePx f px
-  where
-    px = mapMaybe (\x -> M.lookup x im) $ map (s +) o
-
--- loop of n kernel
-convolvePx :: [(Kernel, Bias)] -> [Pixel] -> Pixel
-convolvePx [] _ = []
-convolvePx (wb:wbs) ps = (a:convolvePx wbs ps)
-  where
-    w = fst wb
-    b = snd wb
-    a = dot w ps + b
-
-dot :: Kernel -> [Pixel] -> Double
-dot [] _ = 0.0
-dot _ [] = 0.0
-dot (k:ks) (p:ps) = (dot' k p) + dot ks ps
-  where
-    dot' :: [Double] -> Pixel -> Double
-    dot' k p = sum $ zipWith (*) k p
-
--}
