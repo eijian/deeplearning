@@ -8,16 +8,22 @@ module Trainer (
 ) where
 
 import Control.Monad
+import Debug.Trace
+
 import CNN.Image
 import CNN.LayerType
 import CNN.Layer
+import CNN.Algebra
 
-train :: [Layer] -> Trainer -> (Image, [Layer])
-train [] (i, c) = (i, [])
-train ls (i, c) = (head op, ls')
+train :: [Layer] -> [Layer] -> Trainer -> ([Double], [Layer])
+train [] _ (i, c) = (head $ head i, [])
+train ls (rl:rls) (i, c) = (y', ls')
   where
     op  = forwardProp ls [i]
-    ls' = backwordProp ls op
+    (y, op') = splitAt 1 op
+    ols = zip (tail op') rls
+    y' = head $ head $ head y
+    (d, ls') = backwardProp ols (y' `vsub` c, [rl])
 
 evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
 evaluate _ [] = []

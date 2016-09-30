@@ -7,8 +7,9 @@ module CNN.LayerType (
 , Kernel
 , Bias
 , FilterC
-, FilterH
-, Layer ( NopLayer, ActLayer, MaxPoolLayer, ConvLayer, HiddenLayer
+, FilterF
+, Delta
+, Layer ( NopLayer, ActLayer, MaxPoolLayer, ConvLayer, FullConnLayer
         , FlattenLayer)
 ) where
 
@@ -22,14 +23,19 @@ type Kernel = [[Double]]
 type Bias   = Double
 type FilterC = (Kernel, Bias)
 
--- filter for Hidden Layer
-type FilterH = [Double]
+-- filter for Fully Connected Layer
+type FilterF = [Double]
 
-data Layer = NopLayer
-           | ActLayer ActFunc
-           | MaxPoolLayer Int
-           | ConvLayer Int [FilterC]
-           | HiddenLayer [FilterH]
-           | FlattenLayer (Image -> Image)
+-- for backward propergation
+type Delta = [Double]
+
+data Layer =
+    NopLayer
+  | ActLayer ActFunc
+  | MaxPoolLayer Int
+  | ConvLayer Int [FilterC]
+  | FullConnLayer [FilterF]
+  | FlattenLayer (Image -> Image) (Int -> Int -> Image -> Image) Int Int
+
 
 

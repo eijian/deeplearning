@@ -17,7 +17,7 @@ import CNN.Layer
 import CNN.ActLayer
 import CNN.PoolLayer
 import CNN.ConvLayer
-import CNN.HiddenLayer
+import CNN.FullConnLayer
 
 import Trainer
 
@@ -57,22 +57,24 @@ main = do
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
-  fh1 <- initFilterH n_hidden (2*2*20)
-  fh2 <- initFilterH n_out n_hidden
+  fh1 <- initFilterF n_hidden (2*2*20)
+  fh2 <- initFilterF n_out n_hidden
 
-  let is = [epoch0 .. (epoch0 + epochs - 1)]
-      layers = [ConvLayer 3 fc1
-              , ActLayer relu
-              , MaxPoolLayer 2
-              , ConvLayer 2 fc2
-              , ActLayer relu
-              , MaxPoolLayer 2
-              , FlattenLayer flatten
-              , HiddenLayer fh1
-              , ActLayer relu
-              , HiddenLayer fh2
-              , ActLayer softmax
-              ]
+  let
+    is = [epoch0 .. (epoch0 + epochs - 1)]
+    layers = [
+        ConvLayer 3 fc1
+      , ActLayer relu
+      , MaxPoolLayer 2
+      , ConvLayer 2 fc2
+      , ActLayer relu
+      , MaxPoolLayer 2
+      , FlattenLayer flatten unflatten 2 2
+      , FullConnLayer fh1
+      , ActLayer relu
+      , FullConnLayer fh2
+      , ActLayer softmax
+      ]
 
   putStrLn "Training the model..."
   tm0 <- getCurrentTime
@@ -97,24 +99,25 @@ loop :: Pool p => [Int] -> UTCTime -> [Layer] -> Int -> p -> [Trainer]
 loop [] _ _ _ _ _ = putStr ""
 loop (i:is) tm0 ls b pt se = do
   teachers <- getImages pt i b
-  let ops = map (train ls) teachers
-      (_, dls) = unzip ops
-      ls' = updateLayer ls dls   -- dls = diff of layers
-  if i `mod` opStep == 0 then putStatus i tm0 (evaluate ls' se) ls'
-                         else putStr ""
+  let
+    rls = reverseLayers ls
+    ops = map (train ls rls) teachers
+    (_, dls) = unzip ops
+    ls' = updateLayer ls dls   -- dls = diff of layers
+  if i `mod` opStep == 0
+    then putStatus i tm0 (evaluate ls' se) ls'
+    else putStr ""
   loop is tm0 ls' b pt se
 
 putStatus :: Int -> UTCTime -> [([Double], Double)] -> [Layer] -> IO ()
 putStatus i tm0 rs ls = do
   let (_, rt) = unzip rs
   tm <- getCurrentTime
-  putStrLn ("iter = " ++ show (epoch0 + i - 1) ++
-            "/"     ++ show (epoch0 + epochs - 1) ++
-            " time = " ++ (show $ diffUTCTime tm tm0) ++
-            " ratio = " ++ show (sum rt / fromIntegral (length rt)))
+  putStrLn (
+    "iter = " ++ show (epoch0 + i - 1) ++ "/" ++ show (epoch0 + epochs - 1) ++
+    " time = " ++ (show $ diffUTCTime tm tm0) ++
+    " ratio = " ++ show (sum rt / fromIntegral (length rt)))
   where
     putOne :: ([Double], Double) -> IO ()
     putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
-
-
 

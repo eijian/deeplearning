@@ -5,6 +5,8 @@
 module CNN.ConvLayer (
   initFilterC
 , convolve
+, deconvolve
+, reverseConvFilter
 ) where
 
 import Debug.Trace
@@ -39,7 +41,8 @@ initFilterC k c x y n m = do
     a = sqrt (6.0 / fromIntegral (ri + ro))
     initKernel :: Int -> Int -> IO Kernel
     initKernel c n = do
-      let sz = n * n
+      let
+        sz = n * n
       w <- forM [1..c] $ \i -> do
         w' <- forM [1..sz] $ \j -> do
           r <- MT.randomIO :: IO Double
@@ -63,7 +66,7 @@ test: filter k=3, c=2, s=2
 >>> convolve 2 filter img1
 [[[200.25,236.25],[173.25,209.25]],[[152.5,188.5],[233.5,269.5]],[[152.75,188.75],[197.75,233.75]]]
 >>> convolve 2 filter img2
-[]
+[1.0]
 
 -}
 
@@ -126,6 +129,17 @@ convolveLine s k ps
   | otherwise = ((sum $ zipWith (*) vs k):convolveLine s k ps')
   where
     len = minimum $ map (length) ps
-    vs = concat $ map (take s) ps
+    vs  = concat $ map (take s) ps
     ps' = map (tail) ps
+
+-- back prop
+
+deconvolve :: Int -> [FilterC] -> Image -> Delta -> (Delta, Layer)
+deconvolve s fs im d = ([], ConvLayer s fs)
+
+
+-- reverse
+
+reverseConvFilter :: Int -> [FilterC] -> Layer
+reverseConvFilter s fs = ConvLayer s fs
 
