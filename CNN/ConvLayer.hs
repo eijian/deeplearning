@@ -7,6 +7,7 @@ module CNN.ConvLayer (
 , convolve
 , deconvolve
 , reverseConvFilter
+, updateConvFilter
 ) where
 
 import Debug.Trace
@@ -143,3 +144,7 @@ deconvolve s fs im d = ([], ConvLayer s fs)
 reverseConvFilter :: Int -> [FilterC] -> Layer
 reverseConvFilter s fs = ConvLayer s fs
 
+-- update
+
+updateConvFilter :: Int -> [FilterC] -> [Layer] -> (Layer, [Layer])
+updateConvFilter s fs dl = (ConvLayer s fs, dl)

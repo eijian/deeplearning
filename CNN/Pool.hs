@@ -20,8 +20,8 @@ class Pool p where
   {-
   getImages
     IN : pool
-         #epoch
          batch size
+         #epoch
   -}
   getImages :: p -> Int -> Int -> IO [Trainer]
   {-
@@ -76,7 +76,7 @@ initSamplePool c (sx, sy) o p n = do
       return v'
 
 instance Pool MemPool where
-  getImages p@(MemPool m) e b = do
+  getImages p@(MemPool m) b e = do
     let
       s = nSample p
       o = (e-1) * b `mod` s

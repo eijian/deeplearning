@@ -53,7 +53,7 @@ main = do
   putStrLn "Building the model..."
   poolT <- initSamplePool 1 (12, 12) 3 0.95 train_N
   poolE <- initSamplePool 1 (12, 12) 3 0.90 test_N
-  sampleE <- getImages poolE 1 test_N
+  sampleE <- getImages poolE test_N 1
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
@@ -75,49 +75,55 @@ main = do
       , FullConnLayer fh2
       , ActLayer softmax
       ]
+    getTeachers = getImages poolT batch
 
   putStrLn "Training the model..."
   tm0 <- getCurrentTime
-  putStatus 0 tm0 [([0.0], 0.0)] layers
-  loop is tm0 layers batch poolT sampleE
-
+  putStatus tm0 0 [([0.0], 0.0)]
+  loop getTeachers sampleE (putStatus tm0) layers is
   putStrLn "Finished!"
 
 {- |
 loop
 
-  IN: epoch numbers
-      layers
-      batch size
-      pool of teacher data
+  IN: func of getting teachers (including batch size and pool)
       sample of evaluation
+      layers
+      epoch numbers
+      start time
 
 -}
 
-loop :: Pool p => [Int] -> UTCTime -> [Layer] -> Int -> p -> [Trainer]
+loop :: (Int -> IO [Trainer]) -> [Trainer]
+     -> (Int -> [([Double], Double)] -> IO ()) -> [Layer] -> [Int]
      -> IO ()
-loop [] _ _ _ _ _ = putStr ""
-loop (i:is) tm0 ls b pt se = do
-  teachers <- getImages pt i b
-  let
-    rls = reverseLayers ls
-    ops = map (train ls rls) teachers
-    (_, dls) = unzip ops
-    ls' = updateLayer ls dls   -- dls = diff of layers
-  if i `mod` opStep == 0
-    then putStatus i tm0 (evaluate ls' se) ls'
-    else putStr ""
-  loop is tm0 ls' b pt se
+loop _ _ _ _ [] = putStr ""
+loop getT se putF ls (i:is) = do
+  teachers <- getT i
 
-putStatus :: Int -> UTCTime -> [([Double], Double)] -> [Layer] -> IO ()
-putStatus i tm0 rs ls = do
-  let (_, rt) = unzip rs
+  let
+    rls = tail $ map reverseLayer $ reverse ls  -- fist element isn't used
+    dls = reverse $ map (train ls rls) teachers
+    ls' = update dls ls           -- dls = diff of layers
+
+  if i `mod` opStep == 0
+    then putF i (evaluate ls' se)
+    else putStr ""
+  loop getT se putF ls' is
+
+putStatus :: UTCTime -> Int -> [([Double], Double)] -> IO ()
+putStatus tm0 i rs = do
   tm <- getCurrentTime
+  let
+    (rv, rr) = unzip rs
   putStrLn (
     "iter = " ++ show (epoch0 + i - 1) ++ "/" ++ show (epoch0 + epochs - 1) ++
     " time = " ++ (show $ diffUTCTime tm tm0) ++
-    " ratio = " ++ show (sum rt / fromIntegral (length rt)))
+    " ratio = " ++ show (sum rr / fromIntegral (length rr)))
+  --mapM_ putOne rs  
   where
     putOne :: ([Double], Double) -> IO ()
     putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
+
+
 

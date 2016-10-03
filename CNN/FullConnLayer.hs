@@ -7,6 +7,7 @@ module CNN.FullConnLayer (
 , connect
 , deconnect
 , reverseFullConnFilter
+, updateFullConnFilter
 ) where
 
 import Control.Monad
@@ -54,13 +55,20 @@ connect
 >>> let im = [[[9.0,8.0,7.0]]]
 >>> connect fs im
 [[[46.5,118.1]]]
+>>> let fs2 = []
+>>> connect fs2 im
+*** Exception: invalid FilterF
+>>> connect fs []
+*** Exception: invalid Image
 
 -}
 
 connect :: [FilterF] -> Image -> Image
 connect [] _ = error "invalid FilterF"
 connect _ [] = error "invalid Image"
+-- connect fs [[im]] = [[map (dot (1.0:im)) fs]]
 connect fs [[im]] = [[map (dot (1.0:im)) fs]]
+connect _ [im] = error ("invalid Image 2:" ++ show im)
 
 -- back prop
 
@@ -75,18 +83,10 @@ deconnect fs im d = ([], FullConnLayer (zeroFilterF k c))
 reverseFullConnFilter :: [FilterF] -> Layer
 reverseFullConnFilter fs = FullConnLayer $ transpose fs
 
-{- |
-transpose
+-- update filter
 
->>> let m1 = [[1.0, 2.0], [3.0, 4.0]]
->>> transpose m1
-[[1.0,3.0],[2.0,4.0]]
->>> let m2 = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]
->>> transpose m2
-[[1.0,4.0,7.0],[2.0,5.0,8.0],[3.0,6.0,9.0]]
->>> let m3 = [[1.0, 2.0, 3.0, 10.0], [4.0, 5.0, 6.0, 11.0], [7.0, 8.0, 9.0, 12.0]]
->>> transpose m3
-[[1.0,4.0,7.0],[2.0,5.0,8.0],[3.0,6.0,9.0],[10.0,11.0,12.0]]
+updateFullConnFilter :: [FilterF] -> [Layer] -> (Layer, [Layer])
+updateFullConnFilter fs dl = (FullConnLayer fs, dl)
 
--}
+--averageFilterF = mavg
 

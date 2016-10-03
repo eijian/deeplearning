@@ -4,6 +4,7 @@
 
 module Trainer (
   train
+, update
 , evaluate
 ) where
 
@@ -15,15 +16,19 @@ import CNN.LayerType
 import CNN.Layer
 import CNN.Algebra
 
-train :: [Layer] -> [Layer] -> Trainer -> ([Double], [Layer])
-train [] _ (i, c) = (head $ head i, [])
-train ls (rl:rls) (i, c) = (y', ls')
+train :: [Layer] -> [Layer] -> Trainer -> [Layer]
+train [] _ (i, c) = []
+train ls rls (i, c) = ds
   where
-    op  = forwardProp ls [i]
-    (y, op') = splitAt 1 op
-    ols = zip (tail op') rls
-    y' = head $ head $ head y
-    (d, ls') = backwardProp ols (y' `vsub` c, [rl])
+    (y, op') = splitAt 1 $ forwardProp ls [i]
+    d = (head $ head $ head y) `vsub` c
+    (_, ds) = backwardProp (zip (tail op') rls) (d, [])
+
+update :: [[Layer]] -> [Layer] -> [Layer]
+update dls [] = []
+update (dl:dls) (l:ls) = l':(update (dl':dls) ls)
+  where
+    (l', dl') = updateLayer l dl
 
 evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
 evaluate _ [] = []
@@ -31,4 +36,26 @@ evaluate ls (s:ss) = (op, rt):(evaluate ls ss)
   where
     op = head $ head (head $ forwardProp ls [fst s])
     rt = sum $ zipWith (*) (snd s) op
+
+---
+forwardProp :: [Layer] -> [Image] -> [Image]
+forwardProp [] is = is
+forwardProp (l:ls) im@(i:is) = forwardProp ls ((forwardLayer l i):im)
+
+{- |
+backwardProp
+
+  IN : list of image and layer pair
+       delta from previous step
+       difference of layers
+  OUT: delta
+       difference of layers
+
+-}
+
+backwardProp :: [(Image, Layer)] -> (Delta, [Layer]) -> (Delta, [Layer])
+backwardProp [] (_, ls) = ([], ls)
+backwardProp ((im,l):ols) (d, ls) = backwardProp ols (d', l':ls)
+  where
+    (d', l') = backwardLayer l im d
 
