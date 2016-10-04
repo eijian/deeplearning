@@ -72,11 +72,30 @@ connect _ [im] = error ("invalid Image 2:" ++ show im)
 
 -- back prop
 
+{- |
+deconnect
+
+>>> let im = [[[1.0, 2.0, 3.0]]]
+>>> let delta = [1.0, 2.0]
+>>> let fs = [[1.0, 2.0],[3.0,4.0],[5.0,6.0]]
+>>> let (d,l) = deconnect fs im delta
+>>> show d
+[]
+>>> show l
+[]
+
+-}
+
 deconnect :: [FilterF] -> Image -> Delta -> (Delta, Layer)
-deconnect fs im d = ([], FullConnLayer (zeroFilterF k c))
+deconnect fs im delta = (mmul delta fs, FullConnLayer $ calcDiff delta im')
   where
-    k = length fs
-    c = length $ head fs
+    im' = head $ head im
+
+calcDiff :: Delta -> [Double] -> [FilterF]
+calcDiff delta im = map (mulImage im) delta
+  where
+    mulImage :: [Double] -> Double -> [Double]
+    mulImage im d = map (*d) im
 
 -- reverse
 

@@ -7,6 +7,7 @@ module CNN.Algebra (
 ,  dot
 , transpose
 , mavg
+, mmul
 ) where
 
 vsub :: [Double] -> [Double] -> [Double]
@@ -67,16 +68,19 @@ mavg ms = mscale a ss
     sum (n:ns) = madd n (sum ns)
 
 madd :: [[Double]] -> [[Double]] -> [[Double]]
-madd as [] = as
-madd [] bs = bs
-madd as bs = zipWith vadd as bs
+madd m1s []  = m1s
+madd [] m2s  = m2s
+madd m1s m2s = zipWith vadd m1s m2s
 
 vadd :: [Double] -> [Double] -> [Double]    
 vadd as bs = zipWith (+) as bs
 
 mscale :: Double -> [[Double]] -> [[Double]]
-mscale s as = map (vscale s) as
+mscale s ms = map (vscale s) ms
 
 vscale :: Double -> [Double] -> [Double]
-vscale s as = map (* s) as
+vscale s vs = map (* s) vs
+
+mmul :: [Double] -> [[Double]] -> [Double]
+mmul vs ms = map (dot vs) ms
 
