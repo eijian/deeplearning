@@ -12,6 +12,7 @@ module CNN.FullConnLayer (
 
 import Control.Monad
 import System.Random.Mersenne as MT
+import Debug.Trace
 
 import CNN.LayerType
 import CNN.Image
@@ -22,6 +23,8 @@ initFilterF
 
   IN: #kernel
       #channel
+
+>>> initFilterF 3 20
 
 -}
 
@@ -81,8 +84,6 @@ deconnect
 >>> let (d,l) = deconnect fs im delta
 >>> show d
 []
->>> show l
-[]
 
 -}
 
@@ -105,7 +106,12 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 -- update filter
 
 updateFullConnFilter :: [FilterF] -> [Layer] -> (Layer, [Layer])
-updateFullConnFilter fs dl = (FullConnLayer fs, dl)
+updateFullConnFilter fs dl = (FullConnLayer (madd fs delta), [])
+  where
+    delta = mscale 0.1 $ mavg $ strip dl
 
---averageFilterF = mavg
+strip :: [Layer] -> [[FilterF]]
+strip [] = []
+strip ((FullConnLayer fs):ds) = fs:strip ds
+strip (_:ds) = strip ds
 

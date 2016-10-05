@@ -8,6 +8,8 @@ module CNN.Algebra (
 , transpose
 , mavg
 , mmul
+, madd
+, mscale
 ) where
 
 vsub :: [Double] -> [Double] -> [Double]
@@ -74,6 +76,15 @@ madd m1s m2s = zipWith vadd m1s m2s
 
 vadd :: [Double] -> [Double] -> [Double]    
 vadd as bs = zipWith (+) as bs
+
+{- |
+mscale
+
+>>> let m0 = [[0.0,1.0,2.0],[3.0,4.0,5.0]]
+>>> mscale 2.0 m0
+[[0.0,2.0,4.0],[6.0,8.0,10.0]]
+
+-}
 
 mscale :: Double -> [[Double]] -> [[Double]]
 mscale s ms = map (vscale s) ms

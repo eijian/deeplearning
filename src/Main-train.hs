@@ -57,8 +57,8 @@ main = do
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
-  fh1 <- initFilterF n_hidden (2*2*20)
-  fh2 <- initFilterF n_out n_hidden
+  ff1 <- initFilterF n_hidden (2*2*20)
+  ff2 <- initFilterF n_out n_hidden
 
   let
     is = [epoch0 .. (epoch0 + epochs - 1)]
@@ -70,9 +70,9 @@ main = do
       , ActLayer relu
       , MaxPoolLayer 2
       , FlattenLayer flatten unflatten 2 2
-      , FullConnLayer fh1
+      , FullConnLayer ff1
       , ActLayer relu
-      , FullConnLayer fh2
+      , FullConnLayer ff2
       , ActLayer softmax
       ]
     getTeachers = getImages poolT batch
@@ -100,12 +100,10 @@ loop :: (Int -> IO [Trainer]) -> [Trainer]
 loop _ _ _ _ [] = putStr ""
 loop getT se putF ls (i:is) = do
   teachers <- getT i
-
   let
     rls = tail $ map reverseLayer $ reverse ls  -- fist element isn't used
     dls = reverse $ map (train ls rls) teachers
     ls' = update dls ls           -- dls = diff of layers
-
   if i `mod` opStep == 0
     then putF i (evaluate ls' se)
     else putStr ""

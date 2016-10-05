@@ -18,11 +18,11 @@ import CNN.Algebra
 
 train :: [Layer] -> [Layer] -> Trainer -> [Layer]
 train [] _ (i, c) = []
-train ls rls (i, c) = ds
+train ls rls (i, c) = filter (selectLayer) ds
   where
     (y, op') = splitAt 1 $ forwardProp ls [i]
     d = (head $ head $ head y) `vsub` c
-    (_, ds) = backwardProp (zip (tail op') rls) (d, [])
+    (_, ds) = trace ("d:" ++ show d) $ backwardProp (zip (tail op') rls) (d, [])
 
 update :: [[Layer]] -> [Layer] -> [Layer]
 update dls [] = []
@@ -59,3 +59,7 @@ backwardProp ((im,l):ols) (d, ls) = backwardProp ols (d', l':ls)
   where
     (d', l') = backwardLayer l im d
 
+selectLayer :: Layer -> Bool
+selectLayer (ConvLayer _ _)   = False
+selectLayer (FullConnLayer _) = True
+selectLayer _                 = False

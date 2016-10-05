@@ -38,10 +38,21 @@ relu
 -}
 
 relu :: ActFunc
-relu as = map f as
-  where
-    f :: Double -> Double
-    f a = max a 0.0
+relu as = map (\x -> max x 0.0) as
+
+{- |
+relu'
+
+  IN : array of Double
+  OUT: array of Double
+
+>>> relu' [1.0, 0.0, (-1.1), (-0.5), 2.1]
+[1.0,0.0,0.0,0.0,1.0]
+
+-}
+
+relu' :: ActFunc
+relu' as = map (\x -> if x > 0.0 then 1.0 else 0.0) as
 
 {- |
 softmax
@@ -68,13 +79,25 @@ softmax as = map (\x -> x / sume) es
     es   = map (\x -> exp (x - amax)) as
     sume = sum es
 
-
-
 activate :: ActFunc -> Image -> Image
 activate f im = map (map f) im
 
+{- |
+deactivate
+
+>>> fst $ deactivate relu [[[1.5,(-2.0)]]] [0.5,0.1]
+[0.5,0.0]
+
+-}
+
 deactivate :: ActFunc -> Image -> Delta -> (Delta, Layer)
-deactivate f im d = ([], ActLayer f)
+deactivate f im delta
+  | c == [0.0]  = (zipWith (*) delta f', ActLayer relu')
+  | c == [1.0]  = ([], ActLayer f)
+  | otherwise = ([], ActLayer f)
+  where
+    c = f [0.0]
+    f' = relu' (head $ head im)
 
 reverseActFunc :: ActFunc -> Layer
 reverseActFunc relu = ActLayer step
