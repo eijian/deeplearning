@@ -24,7 +24,11 @@ initFilterF
   IN: #kernel
       #channel
 
->>> initFilterF 3 20
+>>> f <- initFilterF 3 20
+>>> length f
+3
+>>> length $ head f
+21
 
 -}
 
