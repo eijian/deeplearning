@@ -35,8 +35,15 @@ data Layer =
   | MaxPoolLayer Int
   | ConvLayer Int [FilterC]
   | FullConnLayer [FilterF]
-  | FlattenLayer (Image -> Image) (Int -> Int -> Image -> Image) Int Int
+  | FlattenLayer Int Int
 
+instance Show Layer where
+  show NopLayer           = "NopLayer"
+  show (ActLayer f)       = "ActLayer"
+  show (MaxPoolLayer s)   = "MaxPoolLayer:" ++ show s
+  show (ConvLayer s fs)   = "ConvLayer:" ++ show s
+  show (FullConnLayer fs) = "FullConnLayer:" ++ show fs
+  show (FlattenLayer x y) = "FlattenLayer:" ++ show x ++ "/" ++ show y
 
 
 

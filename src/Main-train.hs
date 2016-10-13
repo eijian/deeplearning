@@ -39,10 +39,12 @@ n_out = k
 
 --epochs = 500
 epochs = 200
+--epochs = 1
 opStep = 5
+--opStep = 1
 epoch0 = 1
 batch  = 150
---batch  = 10
+--batch  = 1
 
 learning_rate = 0.1
 
@@ -69,7 +71,7 @@ main = do
       , ConvLayer 2 fc2
       , ActLayer relu
       , MaxPoolLayer 2
-      , FlattenLayer flatten unflatten 2 2
+      , FlattenLayer 2 2
       , FullConnLayer ff1
       , ActLayer relu
       , FullConnLayer ff2
@@ -104,6 +106,10 @@ loop getT se putF ls (i:is) = do
     rls = tail $ map reverseLayer $ reverse ls  -- fist element isn't used
     dls = reverse $ map (train ls rls) teachers
     ls' = update dls ls           -- dls = diff of layers
+  --putStrLn ("LS =" ++ show ls)
+  --putStrLn ("RLS=" ++ show rls)
+  putStrLn ("DLS=" ++ (show $ length dls))
+  putStrLn ("LS'=" ++ (show $ length ls'))
   if i `mod` opStep == 0
     then putF i (evaluate ls' se)
     else putStr ""

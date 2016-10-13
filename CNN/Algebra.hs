@@ -9,12 +9,15 @@ module CNN.Algebra (
 , mavg
 , mmul
 , madd
+, msub
 , mscale
 ) where
 
-vsub :: [Double] -> [Double] -> [Double]
-vsub a b = zipWith (-) a b
+vadd :: [Double] -> [Double] -> [Double]    
+vadd as bs = zipWith (+) as bs
 
+vsub :: [Double] -> [Double] -> [Double]    
+vsub as bs = zipWith (-) as bs
 
 dot :: [Double] -> [Double] -> Double
 dot a b = sum $ zipWith (*) a b
@@ -74,8 +77,10 @@ madd m1s []  = m1s
 madd [] m2s  = m2s
 madd m1s m2s = zipWith vadd m1s m2s
 
-vadd :: [Double] -> [Double] -> [Double]    
-vadd as bs = zipWith (+) as bs
+msub :: [[Double]] -> [[Double]] -> [[Double]]
+msub m1s []  = m1s
+msub [] m2s  = mscale (-1.0) m2s
+msub m1s m2s = zipWith vsub m1s m2s
 
 {- |
 mscale

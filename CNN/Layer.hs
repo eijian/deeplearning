@@ -17,15 +17,15 @@ import CNN.ActLayer
 import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.FullConnLayer
---import CNN.FlattenLayer
+import CNN.FlattenLayer
 
 forwardLayer :: Layer -> Image -> Image
-forwardLayer NopLayer i                = []
-forwardLayer (ActLayer f)            i = activate f    i
-forwardLayer (MaxPoolLayer s)        i = poolMax  s    i
-forwardLayer (ConvLayer s fs)        i = convolve s fs i
-forwardLayer (FullConnLayer fs)      i = connect  fs   i
-forwardLayer (FlattenLayer ff _ _ _) i = ff       i
+forwardLayer NopLayer i           = []
+forwardLayer (ActLayer f)       i = activate f    i
+forwardLayer (MaxPoolLayer s)   i = poolMax  s    i
+forwardLayer (ConvLayer s fs)   i = convolve s fs i
+forwardLayer (FullConnLayer fs) i = connect  fs   i
+forwardLayer (FlattenLayer _ _) i = flatten       i
 
 backwardLayer :: Layer -> Image -> Delta -> (Delta, Layer)
 backwardLayer (NopLayer)       _  d = (d, NopLayer)
@@ -33,15 +33,15 @@ backwardLayer (ActLayer f)     im d = deactivate f    im d
 backwardLayer (MaxPoolLayer s) im d = depoolMax  s    im d
 backwardLayer (ConvLayer s fs) im d = deconvolve s fs im d
 backwardLayer (FullConnLayer fs) im d = deconnect    fs im d
-backwardLayer l@(FlattenLayer _ uf x y) im d = (head $ head $ unflatten x y [[d]], l)
+backwardLayer l@(FlattenLayer x y) im d = (head $ head $ unflatten x y [[d]], l)
 
 reverseLayer :: Layer -> Layer
-reverseLayer (ActLayer f)             = reverseActFunc f
-reverseLayer (MaxPoolLayer s)         = reversePooling s
-reverseLayer (ConvLayer s fs)         = reverseConvFilter s fs
-reverseLayer (FullConnLayer fs)       = reverseFullConnFilter fs
-reverseLayer (NopLayer)               = NopLayer
-reverseLayer l@(FlattenLayer _ _ _ _) = l
+reverseLayer (ActLayer f)         = reverseActFunc f
+reverseLayer (MaxPoolLayer s)     = reversePooling s
+reverseLayer (ConvLayer s fs)     = reverseConvFilter s fs
+reverseLayer (FullConnLayer fs)   = reverseFullConnFilter fs
+reverseLayer (NopLayer)           = NopLayer
+reverseLayer l@(FlattenLayer _ _) = l
 
 updateLayer :: Layer -> [Layer] -> (Layer, [Layer])
 updateLayer (ConvLayer s fs)   dl = updateConvFilter s fs dl

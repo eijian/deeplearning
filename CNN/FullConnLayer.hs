@@ -73,7 +73,6 @@ connect
 connect :: [FilterF] -> Image -> Image
 connect [] _ = error "invalid FilterF"
 connect _ [] = error "invalid Image"
--- connect fs [[im]] = [[map (dot (1.0:im)) fs]]
 connect fs [[im]] = [[map (dot (1.0:im)) fs]]
 connect _ [im] = error ("invalid Image 2:" ++ show im)
 
@@ -92,15 +91,17 @@ deconnect
 -}
 
 deconnect :: [FilterF] -> Image -> Delta -> (Delta, Layer)
-deconnect fs im delta = (mmul delta fs, FullConnLayer $ calcDiff delta im')
+deconnect fs im delta = (mmul delta fs', FullConnLayer $ calcDiff delta im')
   where
+    fs' = tail fs
     im' = head $ head im
 
 calcDiff :: Delta -> [Double] -> [FilterF]
-calcDiff delta im = map (mulImage im) delta
+calcDiff delta im = map (mulImage im') delta
   where
+    im' = 1.0:im
     mulImage :: [Double] -> Double -> [Double]
-    mulImage im d = map (*d) im
+    mulImage im d = map (*d) im'
 
 -- reverse
 
@@ -110,9 +111,14 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 -- update filter
 
 updateFullConnFilter :: [FilterF] -> [Layer] -> (Layer, [Layer])
-updateFullConnFilter fs dl = (FullConnLayer (madd fs delta), [])
+updateFullConnFilter fs dl = (FullConnLayer (msub fs delta), [])
   where
-    delta = mscale 0.1 $ mavg $ strip dl
+    ms = strip dl
+    --delta = mscale 0.1 $ mavg ms
+    delta = mscale 0.1 $ sum ms
+    sum :: [[[Double]]] -> [[Double]]
+    sum [] = []
+    sum (n:ns) = madd n (sum ns)
 
 strip :: [Layer] -> [[FilterF]]
 strip [] = []

@@ -22,7 +22,7 @@ train ls rls (i, c) = filter (selectLayer) ds
   where
     (y, op') = splitAt 1 $ forwardProp ls [i]
     d = (head $ head $ head y) `vsub` c
-    (_, ds) = trace ("d:" ++ show d) $ backwardProp (zip (tail op') rls) (d, [])
+    (_, ds) = backwardProp (zip (tail op') rls) (d, [])
 
 update :: [[Layer]] -> [Layer] -> [Layer]
 update dls [] = []
@@ -55,6 +55,7 @@ backwardProp
 
 backwardProp :: [(Image, Layer)] -> (Delta, [Layer]) -> (Delta, [Layer])
 backwardProp [] (_, ls) = ([], ls)
+--backwardProp ((im,l):ols) (d, ls) = trace ("D=" ++ show d ++ "/D'=" ++ show d') $ backwardProp ols (d', l':ls)
 backwardProp ((im,l):ols) (d, ls) = backwardProp ols (d', l':ls)
   where
     (d', l') = backwardLayer l im d
