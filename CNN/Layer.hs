@@ -43,10 +43,10 @@ reverseLayer (FullConnLayer fs)   = reverseFullConnFilter fs
 reverseLayer (NopLayer)           = NopLayer
 reverseLayer l@(FlattenLayer _ _) = l
 
-updateLayer :: Layer -> [Layer] -> (Layer, [Layer])
-updateLayer (ConvLayer s fs)   dl = updateConvFilter s fs dl
-updateLayer (FullConnLayer fs) dl = updateFullConnFilter fs dl
-updateLayer l dl = (l, dl)
+updateLayer :: Double -> Layer -> [Layer] -> Layer
+updateLayer lr (ConvLayer s fs)   dl = updateConvFilter s fs lr dl
+updateLayer lr (FullConnLayer fs) dl = updateFullConnFilter fs lr dl
+updateLayer lr l dl = l
 
 {-
 transLayer :: [[Layer]] -> [[Layer]]

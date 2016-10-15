@@ -4,6 +4,7 @@
 
 module CNN.FullConnLayer (
   initFilterF
+, zeroFilterF
 , connect
 , deconnect
 , reverseFullConnFilter
@@ -47,8 +48,9 @@ initFilterF k c = do
         return ((r * 2.0 - 1.0) * a)
       return (0.0:w)
 
-zeroFilterF :: Int -> Int -> [FilterF]
-zeroFilterF k c = take k $ repeat (take c $ repeat 0.0)
+zeroFilterF :: Int -> Int -> IO [FilterF]
+zeroFilterF k c = do
+  return $ take k $ repeat (take c $ repeat 0.0)
      
 --
 
@@ -110,15 +112,17 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 
 -- update filter
 
-updateFullConnFilter :: [FilterF] -> [Layer] -> (Layer, [Layer])
-updateFullConnFilter fs dl = (FullConnLayer (msub fs delta), [])
+updateFullConnFilter :: [FilterF] -> Double -> [Layer] -> Layer
+--updateFullConnFilter fs lr dl = trace ("FS=" ++ show fs ++ "/FS'=" ++ show fs' ++ "/DL=" ++ show dl) $ FullConnLayer fs'
+updateFullConnFilter fs lr dl = FullConnLayer fs'
   where
     ms = strip dl
-    --delta = mscale 0.1 $ mavg ms
-    delta = mscale 0.1 $ sum ms
+    delta = mscale (lr / (fromIntegral $ length ms))  $ sum ms
+    --delta = mscale lr $ sum ms
     sum :: [[[Double]]] -> [[Double]]
     sum [] = []
     sum (n:ns) = madd n (sum ns)
+    fs' = msub fs delta
 
 strip :: [Layer] -> [[FilterF]]
 strip [] = []

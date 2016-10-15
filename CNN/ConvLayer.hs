@@ -146,5 +146,5 @@ reverseConvFilter s fs = ConvLayer s fs
 
 -- update
 
-updateConvFilter :: Int -> [FilterC] -> [Layer] -> (Layer, [Layer])
-updateConvFilter s fs dl = (ConvLayer s fs, dl)
+updateConvFilter :: Int -> [FilterC] -> Double -> [Layer] -> Layer
+updateConvFilter s fs lr dl = ConvLayer s fs

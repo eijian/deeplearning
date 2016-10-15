@@ -18,17 +18,17 @@ import CNN.Algebra
 
 train :: [Layer] -> [Layer] -> Trainer -> [Layer]
 train [] _ (i, c) = []
-train ls rls (i, c) = filter (selectLayer) ds
+train ls rls (i, c) = ds
   where
     (y, op') = splitAt 1 $ forwardProp ls [i]
     d = (head $ head $ head y) `vsub` c
     (_, ds) = backwardProp (zip (tail op') rls) (d, [])
 
-update :: [[Layer]] -> [Layer] -> [Layer]
-update dls [] = []
-update (dl:dls) (l:ls) = l':(update (dl':dls) ls)
-  where
-    (l', dl') = updateLayer l dl
+update :: Double -> [[Layer]] -> [Layer] -> [Layer]
+update lr _ [] = []
+update lr [] ls = ls
+--update lr (dl:dls) (l:ls) = trace ("DL=" ++ show dl ++ "/L=" ++ show l) $ (updateLayer lr l dl):(update lr dls ls)
+update lr (dl:dls) (l:ls) = (updateLayer lr l dl):(update lr dls ls)
 
 evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
 evaluate _ [] = []
