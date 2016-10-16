@@ -40,7 +40,8 @@ initFilterF k c = do
     return f'
   return f
   where
-    a = 1.0 / fromIntegral c
+    --a = 1.0 / fromIntegral c
+    a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
     initKernel :: Int -> IO FilterF
     initKernel c = do
       w <- forM [1..c] $ \i -> do

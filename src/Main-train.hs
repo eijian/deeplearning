@@ -61,8 +61,8 @@ main = do
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
   ff1 <- initFilterF n_hidden (2*2*20)
-  --ff2 <- initFilterF n_out n_hidden
-  ff2 <- zeroFilterF n_out n_hidden
+  ff2 <- initFilterF n_out n_hidden
+  --ff2 <- zeroFilterF n_out n_hidden
 
   let
     is = [epoch0 .. (epoch0 + epochs - 1)]
@@ -109,10 +109,6 @@ loop getT se putF ls (i:is) = do
     dls = map (train ls rls) teachers
     dls' = transpose dls
     ls' = update learning_rate dls' ls           -- dls = diff of layers
-  --putStrLn ("LS =" ++ show ls)
-  --putStrLn ("RLS=" ++ show rls)
-  --putStrLn ("DLS=" ++ (show $ dls))
-  --putStrLn ("LS'=" ++ (show $ length ls'))
   if i `mod` opStep == 0
     then putF i (evaluate ls' se)
     else putStr ""
@@ -131,6 +127,3 @@ putStatus tm0 i rs = do
   where
     putOne :: ([Double], Double) -> IO ()
     putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
-
-
-

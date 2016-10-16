@@ -13,7 +13,7 @@ module CNN.ConvLayer (
 import Debug.Trace
 import Control.Monad
 import Data.List
-import qualified Data.Map as M
+--import qualified Data.Map as M
 import Data.Maybe
 import System.Random.Mersenne as MT
 
