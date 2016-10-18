@@ -38,14 +38,14 @@ pool_sizes   = [2, 2]
 n_hidden     = 20
 n_out = k
 
-epochs = 500
---epochs = 200
---epochs = 1
+--epochs = 500
+--epochs = 2000
+epochs = 1
 opStep = 5
 --opStep = 1
 epoch0 = 1
-batch  = 150
---batch  = 2
+--batch  = 150
+batch  = 1
 
 learning_rate = 0.1
 
@@ -64,6 +64,8 @@ main = do
   ff2 <- initFilterF n_out n_hidden
   --ff2 <- zeroFilterF n_out n_hidden
 
+  putStrLn ("FC1=\n" ++ show fc1)
+
   let
     is = [epoch0 .. (epoch0 + epochs - 1)]
     layers = [
@@ -81,6 +83,8 @@ main = do
       ]
     getTeachers = getImages poolT batch
 
+  x <- getTeachers 1
+  putStrLn ("X=\n" ++ (show x))
   putStrLn "Training the model..."
   tm0 <- getCurrentTime
   putStatus tm0 0 [([0.0], 0.0)]

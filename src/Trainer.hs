@@ -6,6 +6,7 @@ module Trainer (
   train
 , update
 , evaluate
+, forwardProp
 ) where
 
 import Control.Monad

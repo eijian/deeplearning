@@ -37,9 +37,9 @@ initFilterC k c x y n m = do
     return (w, 0.0)
   return f
   where
-    ri = x * y * c   -- resolution (input)
-    ro = (x - n + 1) * (y - n + 1) * k `div` (m * m)
-    a = sqrt (6.0 / fromIntegral (ri + ro))
+    ri = fromIntegral (n * n * c)   -- resolution (input)
+    ro = (fromIntegral (n * n * k)) / (fromIntegral (m * m))
+    a = sqrt (6.0 / (ri + ro))
     initKernel :: Int -> Int -> IO Kernel
     initKernel c n = do
       let
