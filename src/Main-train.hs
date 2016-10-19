@@ -38,14 +38,14 @@ pool_sizes   = [2, 2]
 n_hidden     = 20
 n_out = k
 
---epochs = 500
+epochs = 500
 --epochs = 2000
-epochs = 1
+--epochs = 1
 opStep = 5
 --opStep = 1
 epoch0 = 1
---batch  = 150
-batch  = 1
+batch  = 150
+--batch  = 1
 
 learning_rate = 0.1
 
@@ -61,8 +61,8 @@ main = do
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
   ff1 <- initFilterF n_hidden (2*2*20)
-  ff2 <- initFilterF n_out n_hidden
-  --ff2 <- zeroFilterF n_out n_hidden
+  --ff2 <- initFilterF n_out n_hidden
+  ff2 <- zeroFilterF n_out n_hidden
 
   putStrLn ("FC1=\n" ++ show fc1)
 
