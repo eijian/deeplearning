@@ -64,7 +64,7 @@ main = do
   --ff2 <- initFilterF n_out n_hidden
   ff2 <- zeroFilterF n_out n_hidden
 
-  putStrLn ("FC1=\n" ++ show fc1)
+  putStrLn ("FF1=\n" ++ show ff1)
 
   let
     is = [epoch0 .. (epoch0 + epochs - 1)]
