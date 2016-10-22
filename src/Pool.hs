@@ -2,7 +2,7 @@
 -- Pool : image pool
 --
 
-module CNN.Pool (
+module Pool (
   Pool
 , MemPool
 , getImages
@@ -24,10 +24,6 @@ class Pool p where
          #epoch
   -}
   getImages :: p -> Int -> Int -> IO [Trainer]
-  {-
-  nSample
-    IN : pool
-  -}
   nSample :: p -> Int
 
 ---- IMAGE POOL ON MEMORY ----

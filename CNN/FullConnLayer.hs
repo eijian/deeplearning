@@ -11,7 +11,7 @@ module CNN.FullConnLayer (
 , updateFullConnFilter
 ) where
 
-import Control.Monad
+import Control.Monad hiding (msum)
 import System.Random.Mersenne as MT
 import Debug.Trace
 
@@ -40,8 +40,8 @@ initFilterF k c = do
     return f'
   return f
   where
-    --a = 1.0 / fromIntegral c
-    a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
+    a = 1.0 / fromIntegral c
+    --a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
     initKernel :: Int -> IO FilterF
     initKernel c = do
       w <- forM [1..c] $ \i -> do
@@ -76,7 +76,7 @@ connect
 connect :: [FilterF] -> Image -> Image
 connect [] _ = error "invalid FilterF"
 connect _ [] = error "invalid Image"
-connect fs [[im]] = [[map (dot (1.0:im)) fs]]
+connect fs [[im]] = [[map (vdot (1.0:im)) fs]]
 connect _ [im] = error ("invalid Image 2:" ++ show im)
 
 -- back prop
@@ -118,11 +118,13 @@ updateFullConnFilter :: [FilterF] -> Double -> [Layer] -> Layer
 updateFullConnFilter fs lr dl = FullConnLayer fs'
   where
     ms = strip dl
-    delta = mscale (lr / (fromIntegral $ length ms))  $ sum ms
+    delta = mscale (lr / (fromIntegral $ length ms))  $ msum ms
     --delta = mscale lr $ sum ms
+{-
     sum :: [[[Double]]] -> [[Double]]
     sum [] = []
     sum (n:ns) = madd n (sum ns)
+-}
     fs' = msub fs delta
 
 strip :: [Layer] -> [[FilterF]]

@@ -12,7 +12,7 @@ import CNN.Image
 
 
 {- |
-flattenImage
+flatten: flatten image
 
   IN: Image (=[[[Double]]])
 
@@ -26,7 +26,7 @@ flatten :: Image -> Image
 flatten im = [[concat $ concat im]]
 
 {- |
-unflattenImage
+unflatten : unflatten image
 
   IN: [[[Double]]]
 

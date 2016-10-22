@@ -12,7 +12,6 @@ import Debug.Trace
 
 import CNN.Algebra
 import CNN.Image
-import CNN.Pool
 import CNN.LayerType
 import CNN.Layer
 import CNN.ActLayer
@@ -20,6 +19,7 @@ import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.FullConnLayer
 
+import Pool
 import Trainer
 
 x :: [Trainer]
