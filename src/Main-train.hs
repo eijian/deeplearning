@@ -1,5 +1,5 @@
 --
--- CNN : filter generator
+-- CNN : CNN filter generator
 --
 
 module Main (
@@ -10,54 +10,24 @@ import Control.Monad
 import Data.Time
 import Debug.Trace
 
-import CNN.Algebra
-import CNN.Image
-import CNN.LayerType
-import CNN.Layer
 import CNN.ActLayer
-import CNN.PoolLayer
+import CNN.Algebra
 import CNN.ConvLayer
 import CNN.FullConnLayer
+import CNN.Image
+import CNN.Layer
+import CNN.LayerType
+import CNN.PoolLayer
 
 import Pool
 import Status
 import Trainer
-
-{-
--- PARAMETERS
-k = 3   -- number of class
-n = 50  -- number of teacher data for each class
-m = 10  -- number of test data for each class
-
-train_N    = n * k
-test_N     = m * k
-image_size = (12, 12)
-channel    = 1
-
-n_kernels    = [10, 20]
-kernel_sizes = [3, 2]
-pool_sizes   = [2, 2]
-n_hidden     = 20
-n_out = k
-
-epochs = 500
---epochs = 2000
---epochs = 1
-opStep = 5
---opStep = 1
-epoch0 = 1
-batch  = 150
---batch  = 1
-
-learning_rate = 0.1
--}
 
 -- MAIN
 
 main :: IO ()
 main = do
   st <- loadStatus ""
-  putStrLn "Building the model..."
   sampleE <- getImages (poolE st) (ntest st) 1
   tm0 <- getCurrentTime
 
@@ -66,23 +36,24 @@ main = do
     getTeachers = getImages (poolT st) (batch st)
     putF = putStatus tm0 (nepoch st) (epoch0 st) (opstep st)
 
-  x <- getTeachers 1
   putStrLn "Training the model..."
   putF 0 (layers st) sampleE
   layers' <- loop getTeachers sampleE putF (learnR st) (layers st) is
-  -- saveStatus st layers'
+  saveStatus "" st layers'
   putStrLn "Finished!"
 
 {- |
 loop
 
-  IN: func of getting teachers (including batch size and pool)
-      sample of evaluation
-      output func
-      learning rate
-      layers
-      epoch numbers
-  OUT:updated layers
+  IN : func of getting teachers (including batch size and pool)
+       sample of evaluation
+       output func
+       learning rate
+       layers
+       epoch numbers
+
+  OUT: updated layers
+
 -}
 
 loop :: (Int -> IO [Trainer]) -> [Trainer]
@@ -98,6 +69,19 @@ loop getT se putF lr ls (i:is) = do
     ls'' = update lr (transpose dls) ls'           -- dls = diff of layers
   putF i ls'' se
   return ls''
+
+{-
+putStatus
+
+  IN : start time
+       number of epoch
+       start epoch number
+       step size of status output
+       epoch
+       layers
+       sample of evaluation
+
+-}
 
 putStatus :: UTCTime -> Int -> Int -> Int -> Int -> [Layer] -> [Trainer]
           -> IO ()
@@ -115,3 +99,4 @@ putStatus tm0 ep ep0 step i ls se
     where
       putOne :: ([Double], Double) -> IO ()
       putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
+

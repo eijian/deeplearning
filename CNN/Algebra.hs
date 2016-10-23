@@ -16,6 +16,8 @@ module CNN.Algebra (
 , transpose
 ) where
 
+-- VECTOR FUNCTIONS
+
 vadd :: [Double] -> [Double] -> [Double]    
 vadd as bs = zipWith (+) as bs
 
@@ -27,6 +29,8 @@ vscale s vs = map (* s) vs
 
 vdot :: [Double] -> [Double] -> Double
 vdot a b = sum $ zipWith (*) a b
+
+-- MATRIX FUNCTIONS
 
 madd :: [[Double]] -> [[Double]] -> [[Double]]
 madd m1s []  = m1s

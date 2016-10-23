@@ -7,9 +7,8 @@ module CNN.FlattenLayer (
 , unflatten
 ) where
 
-import CNN.LayerType
 import CNN.Image
-
+import CNN.LayerType
 
 {- |
 flatten: flatten image

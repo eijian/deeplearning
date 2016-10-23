@@ -10,23 +10,26 @@ module CNN.ConvLayer (
 , updateConvFilter
 ) where
 
-import Debug.Trace
 import Control.Monad
 import Data.List
 import Data.Maybe
+import Debug.Trace
 import System.Random.Mersenne as MT
 
-import CNN.LayerType
 import CNN.Image
+import CNN.LayerType
 
 {- |
-  initFilterC
+initFilterC
 
-  IN: #kernel
-      #channel
-      input size (x * y)
-      kernel size (n * n)
-      pool size (m * m)
+  IN : #kernel
+       #channel
+       input size (x * y)
+       kernel size (n * n)
+       pool size (m * m)
+
+  OUT: filter of convolution layer
+
 -}
 
 initFilterC :: Int -> Int -> Int -> Int -> Int -> Int -> IO [FilterC]

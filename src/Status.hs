@@ -4,6 +4,7 @@
 
 module Status (
   loadStatus
+, saveStatus
 , layers
 , learnR
 , batch
@@ -15,11 +16,11 @@ module Status (
 , ntest
 ) where
 
-import CNN.LayerType
 import CNN.ActLayer
-import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.FullConnLayer
+import CNN.LayerType
+import CNN.PoolLayer
 
 import Pool
 
@@ -34,6 +35,15 @@ data Status = Status {
   , poolE  :: MemPool
   , ntest  :: Int
   }
+
+{-
+loadStatus
+
+  IN : filename
+
+  OUT: loaded/built status
+
+-}
 
 loadStatus :: String -> IO Status
 loadStatus name
@@ -108,5 +118,16 @@ staticStatus = do
 loadFromFile :: String -> IO Status
 loadFromFile fname = staticStatus
 
+{-
+saveStatus
+
+  IN : filename for output
+       status
+       updated layers
+
+-}
+
+saveStatus :: String -> Status -> [Layer] -> IO ()
+saveStatus fname st ls = putStrLn ("saved to '" ++ fname)
 
   
