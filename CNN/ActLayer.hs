@@ -20,6 +20,9 @@ step
 
   OUT: array of Double
 
+>>> step [1.0, 0.0, (-1.1), (-0.5), 2.1]
+[1.0,0.0,0.0,0.0,1.0]
+
 -}
 
 step :: ActFunc

@@ -98,8 +98,10 @@ deconnect
 >>> let delta = [1.0, 2.0]
 >>> let fs = [[1.0, 2.0],[3.0,4.0],[5.0,6.0]]
 >>> let (d,l) = deconnect fs im delta
->>> show d
-[]
+>>> d
+[11.0,17.0]
+>>> l
+FullConnLayer:[[1.0,1.0,2.0,3.0],[2.0,2.0,4.0,6.0]]
 
 -}
 
@@ -129,12 +131,6 @@ updateFullConnFilter fs lr dl = FullConnLayer fs'
   where
     ms = strip dl
     delta = mscale (lr / (fromIntegral $ length ms))  $ msum ms
-    --delta = mscale lr $ sum ms
-{-
-    sum :: [[[Double]]] -> [[Double]]
-    sum [] = []
-    sum (n:ns) = madd n (sum ns)
--}
     fs' = msub fs delta
 
 strip :: [Layer] -> [[FilterF]]
