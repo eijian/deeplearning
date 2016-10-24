@@ -128,6 +128,6 @@ saveStatus
 -}
 
 saveStatus :: String -> Status -> [Layer] -> IO ()
-saveStatus fname st ls = putStrLn ("saved to '" ++ fname)
+saveStatus fname st ls = putStrLn ("saved to '" ++ fname ++ "'")
 
   
