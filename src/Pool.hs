@@ -2,7 +2,7 @@
 -- Pool : image pool
 --
 
-module CNN.Pool (
+module Pool (
   Pool
 , MemPool
 , getImages
@@ -10,8 +10,8 @@ module CNN.Pool (
 ) where
 
 import           Control.Monad
-import           Data.Maybe
 import qualified Data.Map               as Map
+import           Data.Maybe
 import qualified System.Random.Mersenne as MT
 
 import CNN.Image
@@ -24,10 +24,6 @@ class Pool p where
          #epoch
   -}
   getImages :: p -> Int -> Int -> IO [Trainer]
-  {-
-  nSample
-    IN : pool
-  -}
   nSample :: p -> Int
 
 ---- IMAGE POOL ON MEMORY ----
@@ -42,6 +38,8 @@ initSamplePool
        output size (#class)
        probablity
        n samples
+
+  OUT: memory pool
 -}
 
 initSamplePool :: Int -> (Int, Int) -> Int -> Double -> Int -> IO MemPool

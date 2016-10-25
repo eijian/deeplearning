@@ -12,7 +12,6 @@ import Debug.Trace
 
 import CNN.Algebra
 import CNN.Image
-import CNN.Pool
 import CNN.LayerType
 import CNN.Layer
 import CNN.ActLayer
@@ -20,6 +19,7 @@ import CNN.PoolLayer
 import CNN.ConvLayer
 import CNN.FullConnLayer
 
+import Pool
 import Trainer
 
 -- PARAMETERS
@@ -64,8 +64,6 @@ main = do
   --ff2 <- initFilterF n_out n_hidden
   ff2 <- zeroFilterF n_out n_hidden
 
-  putStrLn ("FF1=\n" ++ show ff1)
-
   let
     is = [epoch0 .. (epoch0 + epochs - 1)]
     layers = [
@@ -84,7 +82,6 @@ main = do
     getTeachers = getImages poolT batch
 
   x <- getTeachers 1
-  putStrLn ("X=\n" ++ (show x))
   putStrLn "Training the model..."
   tm0 <- getCurrentTime
   putStatus tm0 0 [([0.0], 0.0)]
