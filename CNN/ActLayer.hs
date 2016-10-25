@@ -10,14 +10,19 @@ module CNN.ActLayer (
 , reverseActFunc
 ) where
 
-import CNN.LayerType
 import CNN.Image
+import CNN.LayerType
 
 {- |
 step
 
   IN : array of Double
+
   OUT: array of Double
+
+>>> step [1.0, 0.0, (-1.1), (-0.5), 2.1]
+[1.0,0.0,0.0,0.0,1.0]
+
 -}
 
 step :: ActFunc
@@ -79,11 +84,27 @@ softmax as = map (\x -> x / sume) es
     es   = map (\x -> exp (x - amax)) as
     sume = sum es
 
+{-
+activate
+
+  IN : activation function
+       image
+
+  OUT: calculated image
+
+-}
+
 activate :: ActFunc -> Image -> Image
 activate f im = map (map f) im
 
 {- |
 deactivate
+
+  IN : activation function
+       image
+       difference from previous layer
+
+  OUT: difference and updated layer
 
 >>> fst $ deactivate relu [[[1.5,(-2.0)]]] [0.5,0.1]
 [0.5,0.0]

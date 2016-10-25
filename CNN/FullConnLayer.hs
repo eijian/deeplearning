@@ -40,8 +40,8 @@ initFilterF k c = do
     return f'
   return f
   where
-    --a = 1.0 / fromIntegral c
-    a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
+    a = 1.0 / fromIntegral c
+    --a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
     initKernel :: Int -> IO FilterF
     initKernel c = do
       w <- forM [1..c] $ \i -> do
@@ -76,7 +76,7 @@ connect
 connect :: [FilterF] -> Image -> Image
 connect [] _ = error "invalid FilterF"
 connect _ [] = error "invalid Image"
-connect fs [[im]] = [[map (dot (1.0:im)) fs]]
+connect fs [[im]] = [[map (vdot (1.0:im)) fs]]
 connect _ [im] = error ("invalid Image 2:" ++ show im)
 
 -- back prop
@@ -88,8 +88,10 @@ deconnect
 >>> let delta = [1.0, 2.0]
 >>> let fs = [[1.0, 2.0],[3.0,4.0],[5.0,6.0]]
 >>> let (d,l) = deconnect fs im delta
->>> show d
-[]
+>>> d
+[11.0,17.0]
+>>> l
+FullConnLayer:[[1.0,1.0,2.0,3.0],[2.0,2.0,4.0,6.0]]
 
 -}
 
