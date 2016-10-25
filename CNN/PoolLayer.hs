@@ -8,10 +8,20 @@ module CNN.PoolLayer (
 , reversePooling
 ) where
 
-import CNN.LayerType
 import CNN.Image
+import CNN.LayerType
 
 type Pix = (Double, Int)
+
+{-
+poolMax
+
+  In : pooling size (x = y)
+       image
+
+  OUT: updated image
+
+-}
 
 poolMax :: Int -> Image -> Image
 poolMax s im = fst $ unzip $ map unzipPix (poolMax' s im)
