@@ -14,8 +14,8 @@ import Debug.Trace
 
 import CNN.Algebra
 import CNN.Image
-import CNN.LayerType
 import CNN.Layer
+import CNN.LayerType
 
 {-
 train

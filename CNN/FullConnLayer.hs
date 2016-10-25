@@ -27,6 +27,8 @@ initFilterF
 
   OUT: filter of fully connected layer
 
+  OUT: filter of fully connected layer
+
 >>> f <- initFilterF 3 20
 >>> length f
 3
@@ -126,7 +128,6 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 -- update filter
 
 updateFullConnFilter :: [FilterF] -> Double -> [Layer] -> Layer
---updateFullConnFilter fs lr dl = trace ("FS=" ++ show fs ++ "/FS'=" ++ show fs' ++ "/DL=" ++ show dl) $ FullConnLayer fs'
 updateFullConnFilter fs lr dl = FullConnLayer fs'
   where
     ms = strip dl

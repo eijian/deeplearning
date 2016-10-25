@@ -10,14 +10,15 @@ module CNN.Layer (
 ) where
 
 import Debug.Trace
-import CNN.LayerType
 
-import CNN.Image
+
 import CNN.ActLayer
-import CNN.PoolLayer
 import CNN.ConvLayer
-import CNN.FullConnLayer
 import CNN.FlattenLayer
+import CNN.FullConnLayer
+import CNN.Image
+import CNN.LayerType
+import CNN.PoolLayer
 
 forwardLayer :: Layer -> Image -> Image
 forwardLayer (NopLayer)         i = []
@@ -47,5 +48,4 @@ updateLayer :: Double -> Layer -> [Layer] -> Layer
 updateLayer lr (ConvLayer s fs)   dl = updateConvFilter s fs lr dl
 updateLayer lr (FullConnLayer fs) dl = updateFullConnFilter fs lr dl
 updateLayer lr l                  dl = l
-
 

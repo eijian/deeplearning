@@ -25,7 +25,7 @@ flatten :: Image -> Image
 flatten im = [[concat $ concat im]]
 
 {- |
-unflatten : unflatten image
+unflatten: unflatten image
 
   IN: [[[Double]]]
 

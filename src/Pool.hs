@@ -10,8 +10,8 @@ module Pool (
 ) where
 
 import           Control.Monad
-import           Data.Maybe
 import qualified Data.Map               as Map
+import           Data.Maybe
 import qualified System.Random.Mersenne as MT
 
 import CNN.Image
@@ -38,6 +38,8 @@ initSamplePool
        output size (#class)
        probablity
        n samples
+
+  OUT: memory pool
 -}
 
 initSamplePool :: Int -> (Int, Int) -> Int -> Double -> Int -> IO MemPool

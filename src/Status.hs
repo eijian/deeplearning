@@ -53,55 +53,45 @@ loadStatus name
 staticStatus :: IO Status
 staticStatus = do
   let
-    -- data size
-    k = 3
-    n = 50
-    m = 10
-    -- kernel 1
-    ksize1 = 3
-    nchannel1 = 1
-    nkernel1 = 10
-    -- kernel 2
-    ksize2 = 2
-    nchannel2 = nkernel1
-    nkernel2 = 20
-    -- pooling layer
-    psize1 = 2
-    psize2 = 2
-    -- image size
-    xsize1 = 12
-    ysize1 = 12
-    xsize2 = (xsize1 - ksize1 + 1) `div` psize1
-    ysize2 = (ysize1 - ksize1 + 1) `div` psize1
-    xsize3 = (xsize2 - ksize2 + 1) `div` psize2
-    ysize3 = (ysize2 - ksize2 + 1) `div` psize2
+    k = 3   -- number of class
+    n = 50  -- number of teacher data for each class
+    m = 10  -- number of test data for each class
 
-    nhidden = 20
-    nout = k
+    train_N    = n * k
+    test_N     = m * k
+    image_size = [12, 12]
+    channel    = 1
 
-  pt <- initSamplePool 1 (xsize1, ysize1) ksize1 0.95 (n * k)
-  pe <- initSamplePool 1 (xsize1, ysize1) ksize2 0.95 (m * k)
+    n_kernels    = [10, 20]
+    kernel_sizes = [3, 2]
+    pool_sizes   = [2, 2]
+    n_hidden     = 20
+    n_out = k
 
-  fc1 <- initFilterC nkernel1 nchannel1 xsize1 ysize1 ksize1 psize1
-  fc2 <- initFilterC nkernel2 nchannel2 xsize2 ysize2 ksize2 psize2
-  ff1 <- initFilterF nhidden (psize2 * psize2 * nhidden)
-  --ff2 <- initFilterF nout nhidden
-  ff2 <- zeroFilterF nout nhidden
+  pt <- initSamplePool 1 (12, 12) 3 0.95 train_N
+  pe <- initSamplePool 1 (12, 12) 3 0.90 test_N
+
+  fc1 <- initFilterC 10 1 12 12 3 2
+  fc2 <- initFilterC 20 10 5 5 2 2
+  ff1 <- initFilterF n_hidden (2*2*20)
+  --ff2 <- initFilterF n_out n_hidden
+  ff2 <- zeroFilterF n_out n_hidden
 
   let
     ls = [
-        ConvLayer ksize1 fc1
+        ConvLayer 3 fc1
       , ActLayer relu
-      , MaxPoolLayer psize1
-      , ConvLayer ksize2 fc2
+      , MaxPoolLayer 2
+      , ConvLayer 2 fc2
       , ActLayer relu
-      , MaxPoolLayer psize2
-      , FlattenLayer xsize3 ysize3 
+      , MaxPoolLayer 2
+      , FlattenLayer 2 2
       , FullConnLayer ff1
       , ActLayer relu
       , FullConnLayer ff2
       , ActLayer softmax
       ]
+
     stat = Status {
         layers = ls
       , learnR = 0.1
@@ -113,6 +103,7 @@ staticStatus = do
       , poolE  = pe
       , ntest  = m * k
       }
+
   return stat
 
 loadFromFile :: String -> IO Status
@@ -130,4 +121,3 @@ saveStatus
 saveStatus :: String -> Status -> [Layer] -> IO ()
 saveStatus fname st ls = putStrLn ("saved to '" ++ fname ++ "'")
 
-  
