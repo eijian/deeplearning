@@ -10,14 +10,14 @@ import Control.Monad
 import Data.Time
 import Debug.Trace
 
-import CNN.Algebra
-import CNN.Image
-import CNN.LayerType
-import CNN.Layer
 import CNN.ActLayer
-import CNN.PoolLayer
+import CNN.Algebra
 import CNN.ConvLayer
 import CNN.FullConnLayer
+import CNN.Image
+import CNN.Layer
+import CNN.LayerType
+import CNN.PoolLayer
 
 import Pool
 import Trainer
@@ -57,6 +57,7 @@ main = do
   poolT <- initSamplePool 1 (12, 12) 3 0.95 train_N
   poolE <- initSamplePool 1 (12, 12) 3 0.90 test_N
   sampleE <- getImages poolE test_N 1
+  tm0 <- getCurrentTime
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
@@ -66,6 +67,8 @@ main = do
 
   let
     is = [epoch0 .. (epoch0 + epochs - 1)]
+    getTeachers = getImages poolT batch
+    putF = putStatus tm0 epochs epoch0 opStep
     layers = [
         ConvLayer 3 fc1
       , ActLayer relu
@@ -79,13 +82,10 @@ main = do
       , FullConnLayer ff2
       , ActLayer softmax
       ]
-    getTeachers = getImages poolT batch
 
-  x <- getTeachers 1
   putStrLn "Training the model..."
-  tm0 <- getCurrentTime
-  putStatus tm0 0 [([0.0], 0.0)]
-  loop getTeachers sampleE (putStatus tm0) layers is
+  putF 0 layers sampleE
+  loop getTeachers sampleE putF layers is
   putStrLn "Finished!"
 
 {- |
@@ -100,7 +100,7 @@ loop
 -}
 
 loop :: (Int -> IO [Trainer]) -> [Trainer]
-     -> (Int -> [([Double], Double)] -> IO ()) -> [Layer] -> [Int]
+     -> (Int -> [Layer] -> [Trainer] -> IO ()) -> [Layer] -> [Int]
      -> IO ()
 loop _ _ _ _ [] = putStr ""
 loop getT se putF ls (i:is) = do
@@ -110,21 +110,35 @@ loop getT se putF ls (i:is) = do
     dls = map (train ls rls) teachers
     dls' = transpose dls
     ls' = update learning_rate dls' ls           -- dls = diff of layers
-  if i `mod` opStep == 0
-    then putF i (evaluate ls' se)
-    else putStr ""
+  putF i ls' se
   loop getT se putF ls' is
 
-putStatus :: UTCTime -> Int -> [([Double], Double)] -> IO ()
-putStatus tm0 i rs = do
-  tm <- getCurrentTime
-  let
-    (rv, rr) = unzip rs
-  putStrLn (
-    "iter = " ++ show (epoch0 + i - 1) ++ "/" ++ show (epoch0 + epochs - 1) ++
-    " time = " ++ (show $ diffUTCTime tm tm0) ++
-    " ratio = " ++ show (sum rr / fromIntegral (length rr)))
-  --mapM_ putOne rs  
-  where
-    putOne :: ([Double], Double) -> IO ()
-    putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
+{-
+putStatus
+
+  IN : start time
+       number of epoch
+       start epoch number
+       step size of status output
+       epoch
+       layers
+       sample of evaluation
+
+-}
+
+putStatus :: UTCTime -> Int -> Int -> Int -> Int -> [Layer] -> [Trainer]
+          -> IO ()
+putStatus tm0 ep ep0 step i ls se
+  | i `mod` step /= 0 = putStr ""
+  | otherwise         = do
+    let
+      (rv, rr) = unzip $ evaluate ls se
+    tm <- getCurrentTime
+    putStrLn (
+      "iter = " ++ show (ep0 + i - 1) ++ "/" ++ show (ep0 + ep - 1) ++
+      " time = " ++ (show $ diffUTCTime tm tm0) ++
+      " ratio = " ++ show (sum rr / fromIntegral (length rr)))
+    --mapM_ putOne rs  
+    where
+      putOne :: ([Double], Double) -> IO ()
+      putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
