@@ -11,19 +11,21 @@ module CNN.FullConnLayer (
 , updateFullConnFilter
 ) where
 
-import Control.Monad
-import System.Random.Mersenne as MT
+import Control.Monad hiding (msum)
 import Debug.Trace
+import System.Random.Mersenne as MT
 
-import CNN.LayerType
-import CNN.Image
 import CNN.Algebra
+import CNN.Image
+import CNN.LayerType
 
 {- |
 initFilterF
 
   IN: #kernel
       #channel
+
+  OUT: filter of fully connected layer
 
 >>> f <- initFilterF 3 20
 >>> length f
@@ -58,8 +60,10 @@ zeroFilterF k c = do
 {- |
 connect
 
-  IN: filter
-      image
+  IN : filter of fully connected layer
+       image
+
+  OUT: updated image
 
 >>> let fs = [[0.5,1.0,2.0,3.0],[0.1,4.0,5.0,6.0]]
 >>> let im = [[[9.0,8.0,7.0]]]
@@ -83,6 +87,12 @@ connect _ [im] = error ("invalid Image 2:" ++ show im)
 
 {- |
 deconnect
+
+  IN : filter of fully connected layer
+       image
+       difference from previous layer
+
+  OUT: difference and updated layer
 
 >>> let im = [[[1.0, 2.0, 3.0]]]
 >>> let delta = [1.0, 2.0]
@@ -116,15 +126,10 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 -- update filter
 
 updateFullConnFilter :: [FilterF] -> Double -> [Layer] -> Layer
---updateFullConnFilter fs lr dl = trace ("FS=" ++ show fs ++ "/FS'=" ++ show fs' ++ "/DL=" ++ show dl) $ FullConnLayer fs'
 updateFullConnFilter fs lr dl = FullConnLayer fs'
   where
     ms = strip dl
-    delta = mscale (lr / (fromIntegral $ length ms))  $ sum ms
-    --delta = mscale lr $ sum ms
-    sum :: [[[Double]]] -> [[Double]]
-    sum [] = []
-    sum (n:ns) = madd n (sum ns)
+    delta = mscale (lr / (fromIntegral $ length ms))  $ msum ms
     fs' = msub fs delta
 
 strip :: [Layer] -> [[FilterF]]
