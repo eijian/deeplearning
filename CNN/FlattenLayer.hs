@@ -7,12 +7,11 @@ module CNN.FlattenLayer (
 , unflatten
 ) where
 
-import CNN.LayerType
 import CNN.Image
-
+import CNN.LayerType
 
 {- |
-flattenImage
+flatten: flatten image
 
   IN: Image (=[[[Double]]])
 
@@ -26,7 +25,7 @@ flatten :: Image -> Image
 flatten im = [[concat $ concat im]]
 
 {- |
-unflattenImage
+unflatten: unflatten image
 
   IN: [[[Double]]]
 
