@@ -66,7 +66,7 @@ main = do
   ff2 <- zeroFilterF n_out n_hidden
 
   let
-    is = [epoch0 .. (epoch0 + epochs - 1)]
+    is = reverse $ [epoch0 .. (epoch0 + epochs - 1)]
     getTeachers = getImages poolT batch
     putF = putStatus tm0 epochs epoch0 opStep
     layers = [
@@ -85,33 +85,36 @@ main = do
 
   putStrLn "Training the model..."
   putF 0 layers sampleE
-  loop getTeachers sampleE putF layers is
+  layers' <- loop getTeachers sampleE putF learning_rate layers is
   putStrLn "Finished!"
 
 {- |
 loop
 
-  IN: func of getting teachers (including batch size and pool)
-      sample of evaluation
-      layers
-      epoch numbers
-      start time
+  IN : func of getting teachers (including batch size and pool)
+       sample of evaluation
+       output func
+       learning rate
+       layers
+       epoch numbers
+
+  OUT: updated layers
 
 -}
 
 loop :: (Int -> IO [Trainer]) -> [Trainer]
-     -> (Int -> [Layer] -> [Trainer] -> IO ()) -> [Layer] -> [Int]
-     -> IO ()
-loop _ _ _ _ [] = putStr ""
-loop getT se putF ls (i:is) = do
+     -> (Int -> [Layer] -> [Trainer] -> IO ())
+     -> Double -> [Layer] -> [Int] -> IO [Layer]
+loop _ _ _ _ ls [] = return ls
+loop getT se putF lr ls (i:is) = do
+  ls' <- loop getT se putF lr ls is
   teachers <- getT i
   let
-    rls = tail $ map reverseLayer $ reverse ls  -- fist element isn't used
-    dls = map (train ls rls) teachers
-    dls' = transpose dls
-    ls' = update learning_rate dls' ls           -- dls = diff of layers
-  putF i ls' se
-  loop getT se putF ls' is
+    rls = tail $ map reverseLayer $ reverse ls'    -- fist element isn't used
+    dls = map (train ls' rls) teachers
+    ls'' = update lr (transpose dls) ls'           -- dls = diff of layers
+  putF i ls'' se
+  return ls''
 
 {-
 putStatus
