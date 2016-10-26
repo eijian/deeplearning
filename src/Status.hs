@@ -8,8 +8,8 @@ module Status (
 , layers
 , learnR
 , batch
-, epoch0
-, nepoch
+, epoch_st
+, epoch_ed
 , opstep
 , poolT
 , poolE
@@ -25,15 +25,15 @@ import CNN.PoolLayer
 import Pool
 
 data Status = Status {
-    layers :: [Layer]
-  , learnR :: Double
-  , batch  :: Int
-  , epoch0 :: Int
-  , nepoch :: Int
-  , opstep :: Int
-  , poolT  :: MemPool
-  , poolE  :: MemPool
-  , ntest  :: Int
+    layers   :: [Layer]
+  , learnR   :: Double
+  , batch    :: Int
+  , epoch_st :: Int
+  , epoch_ed :: Int
+  , opstep   :: Int
+  , poolT    :: MemPool
+  , poolE    :: MemPool
+  , ntest    :: Int
   }
 
 {-
@@ -93,15 +93,15 @@ staticStatus = do
       ]
 
     stat = Status {
-        layers = ls
-      , learnR = 0.1
-      , batch  = 150
-      , epoch0 = 1
-      , nepoch = 500
-      , opstep = 5
-      , poolT  = pt
-      , poolE  = pe
-      , ntest  = m * k
+        layers   = ls
+      , learnR   = 0.1
+      , batch    = 150
+      , epoch_st = 1
+      , epoch_ed = 500
+      , opstep   = 5
+      , poolT    = pt
+      , poolE    = pe
+      , ntest    = m * k
       }
 
   return stat
