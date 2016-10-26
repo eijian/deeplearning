@@ -9,6 +9,7 @@ module Main (
 import Control.Monad
 import Data.Time
 import Debug.Trace
+import Text.Printf
 
 import CNN.ActLayer
 import CNN.Algebra
@@ -91,11 +92,11 @@ putStatus tm0 eps epe step i ls se
   | otherwise         = do
     let
       (rv, rr) = unzip $ evaluate ls se
+      ite = printf "iter = %5d/%d " (eps + i - 1) epe
+      acc = printf "accuracy = %.10f " (sum rr / fromIntegral (length rr))
+    putStr (ite ++ acc)
     tm <- getCurrentTime
-    putStrLn (
-      "iter = " ++ show (eps + i - 1) ++ "/" ++ show epe ++
-      " time = " ++ (show $ diffUTCTime tm tm0) ++
-      " ratio = " ++ show (sum rr / fromIntegral (length rr)))
+    putStrLn ("time = " ++ (show $ diffUTCTime tm tm0))
     --mapM_ putOne rs  
     where
       putOne :: ([Double], Double) -> IO ()
