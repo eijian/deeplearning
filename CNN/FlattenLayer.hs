@@ -1,27 +1,17 @@
 --
--- Image : image data structure
+-- FlattenLayer: flatten/unflatten layer
 --
 
-module CNN.Image (
-  Image
-, Plain
-, Class
-, Trainer
-, flatten
-, unflatten  
+module CNN.FlattenLayer (
+  flatten
+, unflatten
 ) where
 
-import qualified Data.Map as M
-
-type Plain = [[Double]]    -- 2D: X x Y pixels
-type Image = [Plain]     -- n dimension
-
-type Class = [Double]    -- teacher vector
-
-type Trainer = (Image, Class)
+import CNN.Image
+import CNN.LayerType
 
 {- |
-flattenImage
+flatten: flatten image
 
   IN: Image (=[[[Double]]])
 
@@ -35,7 +25,7 @@ flatten :: Image -> Image
 flatten im = [[concat $ concat im]]
 
 {- |
-unflattenImage
+unflatten: unflatten image
 
   IN: [[[Double]]]
 

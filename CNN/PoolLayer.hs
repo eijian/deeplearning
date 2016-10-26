@@ -4,16 +4,27 @@
 
 module CNN.PoolLayer (
   poolMax
+, depoolMax
+, reversePooling
 ) where
 
-import CNN.LayerType
 import CNN.Image
+import CNN.LayerType
 
 type Pix = (Double, Int)
 
-poolMax :: Layer -> Image -> Image
-poolMax (MaxPoolLayer s) im = fst $ unzip $ map unzipPix (poolMax' s im)
-poolMax _ _ = error "invalid Layer type for MaxPooling"
+{-
+poolMax
+
+  In : pooling size (x = y)
+       image
+
+  OUT: updated image
+
+-}
+
+poolMax :: Int -> Image -> Image
+poolMax s im = fst $ unzip $ map unzipPix (poolMax' s im)
 
 unzipPix :: [[Pix]] -> ([[Double]], [[Int]])
 unzipPix pixs = unzip $ map unzip pixs
@@ -60,3 +71,15 @@ max' (x:xs) = maximum' x (max' xs)
 
 maximum' :: Pix -> Pix -> Pix
 maximum' a@(v1, i1) b@(v2, i2) = if v1 < v2 then b else a
+
+-- back prop
+
+depoolMax :: Int -> Image -> Delta -> (Delta, Layer)
+depoolMax s im d = ([], MaxPoolLayer s)
+
+-- reverse
+
+reversePooling :: Int -> Layer
+reversePooling s = MaxPoolLayer s
+
+

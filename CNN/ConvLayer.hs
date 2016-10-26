@@ -5,26 +5,31 @@
 module CNN.ConvLayer (
   initFilterC
 , convolve
+, deconvolve
+, reverseConvFilter
+, updateConvFilter
 ) where
 
-import Debug.Trace
 import Control.Monad
 import Data.List
-import qualified Data.Map as M
 import Data.Maybe
+import Debug.Trace
 import System.Random.Mersenne as MT
 
-import CNN.LayerType
 import CNN.Image
+import CNN.LayerType
 
 {- |
-  initFilterC
+initFilterC
 
-  IN: #kernel
-      #channel
-      input size (x * y)
-      kernel size (n * n)
-      pool size (m * m)
+  IN : #kernel
+       #channel
+       input size (x * y)
+       kernel size (n * n)
+       pool size (m * m)
+
+  OUT: filter of convolution layer
+
 -}
 
 initFilterC :: Int -> Int -> Int -> Int -> Int -> Int -> IO [FilterC]
@@ -34,12 +39,13 @@ initFilterC k c x y n m = do
     return (w, 0.0)
   return f
   where
-    ri = x * y * c   -- resolution (input)
-    ro = (x - n + 1) * (y - n + 1) * k `div` (m * m)
-    a = sqrt (6.0 / fromIntegral (ri + ro))
+    ri = fromIntegral (n * n * c)   -- resolution (input)
+    ro = (fromIntegral (n * n * k)) / (fromIntegral (m * m))
+    a = sqrt (6.0 / (ri + ro))
     initKernel :: Int -> Int -> IO Kernel
     initKernel c n = do
-      let sz = n * n
+      let
+        sz = n * n
       w <- forM [1..c] $ \i -> do
         w' <- forM [1..sz] $ \j -> do
           r <- MT.randomIO :: IO Double
@@ -63,7 +69,7 @@ test: filter k=3, c=2, s=2
 >>> convolve 2 filter img1
 [[[200.25,236.25],[173.25,209.25]],[[152.5,188.5],[233.5,269.5]],[[152.75,188.75],[197.75,233.75]]]
 >>> convolve 2 filter img2
-[]
+[[[200.25,236.25,272.25],[173.25,209.25,245.25],[182.25,218.25,254.25]],[[152.5,188.5,224.5],[233.5,269.5,305.5],[206.5,242.5,278.5]],[[152.75,188.75,224.75],[197.75,233.75,269.75],[278.75,314.75,350.75]]]
 
 -}
 
@@ -126,6 +132,21 @@ convolveLine s k ps
   | otherwise = ((sum $ zipWith (*) vs k):convolveLine s k ps')
   where
     len = minimum $ map (length) ps
-    vs = concat $ map (take s) ps
+    vs  = concat $ map (take s) ps
     ps' = map (tail) ps
 
+-- back prop
+
+deconvolve :: Int -> [FilterC] -> Image -> Delta -> (Delta, Layer)
+deconvolve s fs im d = ([], ConvLayer s fs)
+
+
+-- reverse
+
+reverseConvFilter :: Int -> [FilterC] -> Layer
+reverseConvFilter s fs = ConvLayer s fs
+
+-- update
+
+updateConvFilter :: Int -> [FilterC] -> Double -> [Layer] -> Layer
+updateConvFilter s fs lr dl = ConvLayer s fs
