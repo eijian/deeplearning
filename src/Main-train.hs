@@ -28,12 +28,12 @@ import Trainer
 
 main :: IO ()
 main = do
+  putStrLn "Initializing..."
   st <- loadStatus ""
   sampleE <- getImages (poolE st) (ntest st) 1
   tm0 <- getCurrentTime
 
   let
-    --is = reverse $ [(epoch0 st) .. ((epoch0 st) + (nepoch st) - 1)]
     is = [(epoch_ed st), (epoch_ed st)-1 .. (epoch_st st)]
     getTeachers = getImages (poolT st) (batch st)
     putF = putStatus tm0 (epoch_st st) (epoch_ed st) (opstep st)
@@ -41,6 +41,8 @@ main = do
   putStrLn "Training the model..."
   putF 0 (layers st) sampleE
   layers' <- trainLoop getTeachers sampleE putF (learnR st) (layers st) is
+
+  putStrLn "Saving status..."
   saveStatus "" st layers'
   putStrLn "Finished!"
 

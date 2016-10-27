@@ -30,10 +30,11 @@ train
 
 train :: [Layer] -> [Layer] -> Trainer -> [Layer]
 train [] _ (i, c) = []
-train ls rls (i, c) = snd $ backwardProp (zip (tail op') rls) (d, [])
+train ls rls (i, c) = dls
   where
     (y, op') = splitAt 1 $ forwardProp ls [i]
     d = (head $ head $ head y) `vsub` c
+    (_, dls) = backwardProp (zip (tail op') rls) (d, [])
 
 {-
 update
