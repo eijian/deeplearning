@@ -12,6 +12,7 @@ module CNN.FullConnLayer (
 ) where
 
 import Control.Monad hiding (msum)
+--import Data.List
 import Debug.Trace
 import System.Random.Mersenne as MT
 
@@ -108,12 +109,13 @@ FullConnLayer:[[1.0,1.0,2.0,3.0],[2.0,2.0,4.0,6.0]]
 -}
 
 deconnect :: [FilterF] -> Image -> Delta -> (Delta, Layer)
-deconnect fs im delta = (mmul delta fs', FullConnLayer $ calcDiff delta im')
+deconnect fs im delta = ([[mmul dl fs']], FullConnLayer $ calcDiff dl im')
   where
+    dl  = head $ head delta
     fs' = tail fs
     im' = head $ head im
 
-calcDiff :: Delta -> [Double] -> [FilterF]
+calcDiff :: [Double] -> [Double] -> [FilterF]
 calcDiff delta im = map (mulImage im') delta
   where
     im' = 1.0:im

@@ -116,12 +116,13 @@ deactivate
 
 deactivate :: ActFunc -> Image -> Delta -> (Delta, Layer)
 deactivate f im delta
-  | c == [0.0]  = (zipWith (*) delta f', ActLayer relu')
+  | c == [0.0]  = ([[zipWith (*) dl f']], ActLayer relu')
   | c == [1.0]  = ([], ActLayer f)
   | otherwise = ([], ActLayer f)
   where
     c = f [0.0]
     f' = relu' (head $ head im)
+    dl = head $ head delta
 
 reverseActFunc :: ActFunc -> Layer
 reverseActFunc relu = ActLayer step

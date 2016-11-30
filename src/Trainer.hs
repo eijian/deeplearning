@@ -33,7 +33,7 @@ train [] _ (i, c) = []
 train ls rls (i, c) = dls
   where
     (y, op') = splitAt 1 $ forwardProp ls [i]
-    d = (head $ head $ head y) `vsub` c
+    d = [[(head $ head $ head y) `vsub` c]]
     (_, dls) = backwardProp (zip (tail op') rls) (d, [])
 
 {-
@@ -84,7 +84,7 @@ fowardProp
 
 forwardProp :: [Layer] -> [Image] -> [Image]
 forwardProp [] is = is
-forwardProp (l:ls) im@(i:is) = forwardProp ls ((forwardLayer l i):im)
+forwardProp (l:ls) (i:is) = forwardProp ls ((forwardLayer l i) ++ is)
 
 {- |
 backwardProp

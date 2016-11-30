@@ -27,7 +27,8 @@ type FilterC = (Kernel, Bias)
 type FilterF = [Double]
 
 -- for backward propergation
-type Delta = [Double]
+--type Delta = [Double]
+type Delta = Image
 
 data Layer =
     NopLayer
