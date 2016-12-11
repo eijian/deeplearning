@@ -109,20 +109,21 @@ deactivate
 
   OUT: difference and updated layer
 
->>> fst $ deactivate relu [[[1.5,(-2.0)]]] [0.5,0.1]
-[0.5,0.0]
+>>> fst $ deactivate relu [[[1.5,(-2.0)]]] [[[0.5,0.1]]]
+[[[0.5,0.0]]]
 
 -}
 
+
 deactivate :: ActFunc -> Image -> Delta -> (Delta, Layer)
 deactivate f im delta
-  | c == [0.0]  = ([[zipWith (*) dl f']], ActLayer relu')
+  | c == [0.0]  = (dl', ActLayer relu')
   | c == [1.0]  = ([], ActLayer f)
   | otherwise = ([], ActLayer f)
   where
     c = f [0.0]
-    f' = relu' (head $ head im)
-    dl = head $ head delta
+    f' = map (map relu') im
+    dl' = zipWith (zipWith (zipWith (*))) delta f'
 
 reverseActFunc :: ActFunc -> Layer
 reverseActFunc relu = ActLayer step

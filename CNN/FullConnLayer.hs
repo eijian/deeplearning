@@ -98,11 +98,11 @@ deconnect
   OUT: difference and updated layer
 
 >>> let im = [[[1.0, 2.0, 3.0]]]
->>> let delta = [1.0, 2.0]
+>>> let delta = [[[1.0, 2.0]]]
 >>> let fs = [[1.0, 2.0],[3.0,4.0],[5.0,6.0]]
 >>> let (d,l) = deconnect fs im delta
 >>> d
-[11.0,17.0]
+[[[11.0,17.0]]]
 >>> l
 FullConnLayer:[[1.0,1.0,2.0,3.0],[2.0,2.0,4.0,6.0]]
 

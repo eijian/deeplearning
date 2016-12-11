@@ -141,10 +141,28 @@ deconvolve :: Int -> [FilterC] -> Image -> Delta -> (Delta, Layer)
 deconvolve s fs im d = ([], ConvLayer s fs)
 
 
--- reverse
+{- |
+reverseConvFilter
+
+  IN : kernel size
+       original filter
+  OUT: reversed filter
+
+>>> let fs = [([[0.1,0.2,0.3,0.4],[0.5,0.6,0.7,0.8]],1.0),([[0.1,0.3,0.5,0.7],[0.2,0.4,0.6,0.8]],2.0),([[0.1,0.2,0.5,0.6],[0.3,0.4,0.7,0.8]],3.0)] :: [FilterC]
+>>> let ConvLayer s fs' = reverseConvFilter 2 fs
+>>> s
+2
+>>> fs'
+[([[0.4,0.3,0.2,0.1],[0.7,0.5,0.3,0.1],[0.6,0.5,0.2,0.1]],0.0),([[0.8,0.7,0.6,0.5],[0.8,0.6,0.4,0.2],[0.8,0.7,0.4,0.3]],0.0)]
+
+-}
 
 reverseConvFilter :: Int -> [FilterC] -> Layer
-reverseConvFilter s fs = ConvLayer s fs
+reverseConvFilter s fs = ConvLayer s fs'
+  where
+    (k, _) = unzip fs
+    rv     = transpose $ map (map reverse) k
+    fs'    = zip rv (repeat 0.0)
 
 -- update
 
