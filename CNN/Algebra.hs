@@ -26,6 +26,8 @@ vadd [] bs = bs
 vadd as bs = zipWith (+) as bs
 
 vsub :: [Double] -> [Double] -> [Double]    
+vsub as [] = as
+vsub [] bs = vscale (-1.0) bs
 vsub as bs = zipWith (-) as bs
 
 {- |
@@ -38,10 +40,10 @@ vsum
 -}
 
 vsum :: [[Double]] -> [Double]
-vsum vs = foldr vadd [] vs
+vsum = foldr vadd []
 
 vscale :: Double -> [Double] -> [Double]
-vscale s vs = map (* s) vs
+vscale s = map (* s)
 
 vdot :: [Double] -> [Double] -> Double
 vdot a b = sum $ zipWith (*) a b
@@ -90,9 +92,9 @@ msum
 -}
 
 msum :: [[[Double]]] -> [[Double]]
---msum ns = foldr madd [] ns
-msum [] = []
-msum (n:ns) = madd n (msum ns)
+msum = foldr madd []
+--msum [] = []
+--msum (n:ns) = madd n (msum ns)
 
 {- |
 mscale
@@ -104,7 +106,7 @@ mscale
 -}
 
 mscale :: Double -> [[Double]] -> [[Double]]
-mscale s ms = map (vscale s) ms
+mscale s = map (vscale s)
 
 {- |
 mmul
@@ -117,7 +119,7 @@ mmul
 -}
 
 mmul :: [Double] -> [[Double]] -> [Double]
-mmul vs ms = map (vdot vs) ms
+mmul vs = map (vdot vs)
 
 {- |
 mdot
@@ -150,7 +152,7 @@ mavg
 mavg :: [[[Double]]] -> [[Double]]
 mavg ms = mscale a ss
   where
-    a = 1.0 / (fromIntegral $ length ms)
+    a = 1.0 / fromIntegral (length ms)
     ss = msum ms
 
 {- |
@@ -170,8 +172,8 @@ transpose
 
 transpose :: Eq a => [[a]] -> [[a]]
 transpose fs
-  | l == []   = []
-  | otherwise = l:(transpose fs')
+  | null l    = []
+  | otherwise = l : transpose fs'
   where
     (ls, fs') = tr fs
     l = concat ls

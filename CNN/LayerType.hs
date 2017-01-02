@@ -47,13 +47,13 @@ instance Show Layer where
   show (FlattenLayer x y) = "FlattenLayer:" ++ show x ++ "/" ++ show y
 
 instance Eq Layer where
-  NopLayer == NopLayer = True
-  (ActLayer f1) == (ActLayer f2) = True
-  (MaxPoolLayer s1) == (MaxPoolLayer s2) = (s1 == s2)
-  (ConvLayer s1 fs1) == (ConvLayer s2 fs2) = (s1 == s2 && fs1 == fs2)
-  (FullConnLayer fs1) == (FullConnLayer fs2) = (fs1 == fs2)
-  (FlattenLayer x1 y1) == (FlattenLayer x2 y2) = (x1 == x2 && y1 == y2)
-  _ == _ = False
+  NopLayer             == NopLayer             = True
+  (ActLayer f1)        == (ActLayer f2)        = True
+  (MaxPoolLayer s1)    == (MaxPoolLayer s2)    = s1 == s2
+  (ConvLayer s1 fs1)   == (ConvLayer s2 fs2)   = s1 == s2 && fs1 == fs2
+  (FullConnLayer fs1)  == (FullConnLayer fs2)  = fs1 == fs2
+  (FlattenLayer x1 y1) == (FlattenLayer x2 y2) = x1 == x2 && y1 == y2
+  _                    == _                    = False
 
 
 

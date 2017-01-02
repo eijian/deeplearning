@@ -38,7 +38,7 @@ unzipPix :: [[Pix]] -> ([[Double]], [[Double]])
 unzipPix pixs = unzip $ map unzip pixs
 
 poolMax' :: Int -> Image -> [[[Pix]]]
-poolMax' s im = map (poolMaxPlain s) im
+poolMax' s = map (poolMaxPlain s)
 
 poolMaxPlain :: Int -> Plain -> [[Pix]]
 poolMaxPlain s p = map (poolMaxLine s) ls
@@ -47,7 +47,7 @@ poolMaxPlain s p = map (poolMaxLine s) ls
 
 splitPlain :: Int -> Plain -> [[[Double]]]
 splitPlain s [] = []
-splitPlain s p  = (p':splitPlain s ps)
+splitPlain s p  = p' : splitPlain s ps
   where
     (p', ps)  = splitAt s p
 
@@ -66,10 +66,10 @@ poolMaxLine :: Int -> [[Double]] -> [Pix]
 poolMaxLine _ [] = []
 poolMaxLine s ls
   | len == 0  = []
-  | otherwise = (pixs:poolMaxLine s ls')
+  | otherwise = pixs : poolMaxLine s ls'
   where
     len  = length $ head ls
-    pixs = max' $ zip (concat $ map (take s) ls) [0.0 ..]
+    pixs = max' $ zip (concatMap (take s) ls) [0.0 ..]
     ls'  = map (drop s) ls
 
 max' :: [Pix] -> Pix
@@ -118,19 +118,19 @@ expand s r ps ds = map concat (transpose $ map split' $ zipWith ex ps ds)
   where
     split' = split s
     ex :: Int -> Double -> [Double]
-    ex p d = take (s*s) ((take p $ repeat r) ++ [d] ++ repeat r)
+    ex p d = take (s*s) (replicate p r ++ [d] ++ repeat r)
 
 split :: Int -> [a] -> [[a]]
 split s [] = []
 split s xs
   | length xs < s = [xs]
-  | otherwise     = l:(split s ls)
+  | otherwise     = l : split s ls
     where
       (l, ls) = splitAt s xs
 
 -- reverse
 
 reversePooling :: Int -> Layer
-reversePooling s = MaxPoolLayer s
+reversePooling = MaxPoolLayer
 
 

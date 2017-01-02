@@ -26,7 +26,7 @@ step
 -}
 
 step :: ActFunc
-step as = map f as
+step = map f
   where
     f :: Double -> Double
     f a = if a > 0.0 then 1.0 else 0.0
@@ -44,7 +44,7 @@ relu
 -}
 
 relu :: ActFunc
-relu as = map (\x -> max x 0.0) as
+relu = map (`max` 0.0)
 
 {- |
 relu'
@@ -59,7 +59,7 @@ relu'
 -}
 
 relu' :: ActFunc
-relu' as = map (\x -> if x > 0.0 then 1.0 else 0.0) as
+relu' = map (\x -> if x > 0.0 then 1.0 else 0.0)
 
 {- |
 softmax
@@ -81,7 +81,7 @@ True
 -}
 
 softmax :: ActFunc
-softmax as = map (\x -> x / sume) es
+softmax as = map (/ sume) es
   where
     amax = maximum as
     es   = map (\x -> exp (x - amax)) as
@@ -98,7 +98,7 @@ activate
 -}
 
 activate :: ActFunc -> Image -> Image
-activate f im = map (map f) im
+activate f = map (map f)
 
 {- |
 deactivate

@@ -39,11 +39,7 @@ initFilterF
 -}
 
 initFilterF :: Int -> Int -> IO [FilterF]
-initFilterF k c = do
-  f <- forM [1..k] $ \i -> do
-    f' <- initKernel c
-    return f'
-  return f
+initFilterF k c = forM [1..k] $ \i -> initKernel c
   where
     a = 1.0 / fromIntegral c
     --a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
@@ -55,8 +51,7 @@ initFilterF k c = do
       return (0.0:w)
 
 zeroFilterF :: Int -> Int -> IO [FilterF]
-zeroFilterF k c = do
-  return $ take k $ repeat (take c $ repeat 0.0)
+zeroFilterF k c = return $ replicate k (replicate c 0.0)
      
 --
 
@@ -132,12 +127,11 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 updateFullConnFilter :: [FilterF] -> Double -> [Layer] -> Layer
 updateFullConnFilter fs lr dl = FullConnLayer fs'
   where
-    ms = strip dl
-    delta = mscale (lr / (fromIntegral $ length ms))  $ msum ms
+    delta = mscale (lr / fromIntegral (length dl)) (msum $ strip dl)
     fs' = msub fs delta
 
 strip :: [Layer] -> [[FilterF]]
 strip [] = []
-strip ((FullConnLayer fs):ds) = fs:strip ds
+strip (FullConnLayer fs:ds) = fs:strip ds
 strip (_:ds) = strip ds
 
