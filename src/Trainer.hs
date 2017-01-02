@@ -33,7 +33,7 @@ train [] _ (i, c) = []
 train ls rls (i, c) = dls
   where
     (y, op') = splitAt 1 $ forwardProp ls [i]
-    d = [[(head $ head $ head y) `vsub` c]]
+    d = [[head (head $ head y) `vsub` c]]
     (_, dls) = backwardProp (zip (tail op') rls) (d, [])
 
 {-
@@ -50,7 +50,7 @@ update
 update :: Double -> [[Layer]] -> [Layer] -> [Layer]
 update lr _ [] = []
 update lr [] ls = ls
-update lr (dl:dls) (l:ls) = (updateLayer lr l dl):(update lr dls ls)
+update lr (dl:dls) (l:ls) = updateLayer lr l dl : update lr dls ls
 
 {-
 evaluate
@@ -65,7 +65,7 @@ evaluate
 
 evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
 evaluate _ [] = []
-evaluate ls (s:ss) = (op, rt):(evaluate ls ss)
+evaluate ls (s:ss) = (op, rt) : evaluate ls ss
   where
     op = head $ head (head $ forwardProp ls [fst s])
     rt = sum $ zipWith (*) (snd s) op
@@ -84,7 +84,7 @@ fowardProp
 
 forwardProp :: [Layer] -> [Image] -> [Image]
 forwardProp [] is = is
-forwardProp (l:ls) (i:is) = forwardProp ls ((forwardLayer l i) ++ is)
+forwardProp (l:ls) (i:is) = forwardProp ls (forwardLayer l i ++ is)
 
 {- |
 backwardProp
