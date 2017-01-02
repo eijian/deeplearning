@@ -5,6 +5,7 @@
 module CNN.Algebra (
   vadd
 , vsub
+, vsum
 , vscale
 , vdot
 , madd
@@ -12,17 +13,32 @@ module CNN.Algebra (
 , msum
 , mscale
 , mmul
+, mdot
 , mavg
 , transpose
 ) where
 
 -- VECTOR FUNCTIONS
 
-vadd :: [Double] -> [Double] -> [Double]    
+vadd :: [Double] -> [Double] -> [Double]
+vadd as [] = as
+vadd [] bs = bs
 vadd as bs = zipWith (+) as bs
 
 vsub :: [Double] -> [Double] -> [Double]    
 vsub as bs = zipWith (-) as bs
+
+{- |
+vsum
+
+>>> let vs = [[1.0,2.0,3.0],[4.0,5.0,6.0]]
+>>> vsum vs
+[5.0,7.0,9.0]
+
+-}
+
+vsum :: [[Double]] -> [Double]
+vsum vs = foldr vadd [] vs
 
 vscale :: Double -> [Double] -> [Double]
 vscale s vs = map (* s) vs
@@ -74,6 +90,7 @@ msum
 -}
 
 msum :: [[[Double]]] -> [[Double]]
+--msum ns = foldr madd [] ns
 msum [] = []
 msum (n:ns) = madd n (msum ns)
 
@@ -102,11 +119,18 @@ mmul
 mmul :: [Double] -> [[Double]] -> [Double]
 mmul vs ms = map (vdot vs) ms
 
-{-
+{- |
 mdot
 
-  make? or not?
+>>> let m1 = [[1.0,2.0],[3.0,4.0]]
+>>> let m2 = [[5.0,6.0],[7.0,8.0]]
+>>> mdot m1 m2
+70.0
+
 -}
+
+mdot :: [[Double]] -> [[Double]] -> Double
+mdot as bs = sum $ zipWith vdot as bs
 
 {- |
 mavg
@@ -146,7 +170,7 @@ transpose
 
 transpose :: Eq a => [[a]] -> [[a]]
 transpose fs
-  | l == [] = []
+  | l == []   = []
   | otherwise = l:(transpose fs')
   where
     (ls, fs') = tr fs
