@@ -40,7 +40,7 @@ unflatten x y [[ds]] = split y $ split x ds
   where
     split :: Int -> [a] -> [[a]]
     split _ [] = []
-    split n ds = (d:split n ds')
+    split n ds = d : split n ds'
       where
         (d, ds') = splitAt n ds
 

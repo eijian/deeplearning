@@ -7,6 +7,7 @@ module Main (
 ) where
 
 import Control.Monad
+--import Data.List
 import Data.Time
 import Debug.Trace
 import Text.Printf
@@ -34,7 +35,7 @@ main = do
   tm0 <- getCurrentTime
 
   let
-    is = [(epoch_ed st), (epoch_ed st)-1 .. (epoch_st st)]
+    is = [(epoch_ed st), (epoch_ed st - 1) .. (epoch_st st)]
     getTeachers = getImages (poolT st) (batch st)
     putF = putStatus tm0 (epoch_st st) (epoch_ed st) (opstep st)
 
@@ -98,7 +99,7 @@ putStatus tm0 eps epe step i ls se
       acc = printf "accuracy = %.10f " (sum rr / fromIntegral (length rr))
     putStr (ite ++ acc)
     tm <- getCurrentTime
-    putStrLn ("time = " ++ (show $ diffUTCTime tm tm0))
+    putStrLn ("time = " ++ show (diffUTCTime tm tm0))
     --mapM_ putOne rs  
     where
       putOne :: ([Double], Double) -> IO ()

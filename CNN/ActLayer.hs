@@ -26,7 +26,7 @@ step
 -}
 
 step :: ActFunc
-step as = map f as
+step = map f
   where
     f :: Double -> Double
     f a = if a > 0.0 then 1.0 else 0.0
@@ -44,7 +44,7 @@ relu
 -}
 
 relu :: ActFunc
-relu as = map (\x -> max x 0.0) as
+relu = map (`max` 0.0)
 
 {- |
 relu'
@@ -59,7 +59,7 @@ relu'
 -}
 
 relu' :: ActFunc
-relu' as = map (\x -> if x > 0.0 then 1.0 else 0.0) as
+relu' = map (\x -> if x > 0.0 then 1.0 else 0.0)
 
 {- |
 softmax
@@ -81,7 +81,7 @@ True
 -}
 
 softmax :: ActFunc
-softmax as = map (\x -> x / sume) es
+softmax as = map (/ sume) es
   where
     amax = maximum as
     es   = map (\x -> exp (x - amax)) as
@@ -98,7 +98,7 @@ activate
 -}
 
 activate :: ActFunc -> Image -> Image
-activate f im = map (map f) im
+activate f = map (map f)
 
 {- |
 deactivate
@@ -109,19 +109,21 @@ deactivate
 
   OUT: difference and updated layer
 
->>> fst $ deactivate relu [[[1.5,(-2.0)]]] [0.5,0.1]
-[0.5,0.0]
+>>> fst $ deactivate relu [[[1.5,(-2.0)]]] [[[0.5,0.1]]]
+[[[0.5,0.0]]]
 
 -}
 
+
 deactivate :: ActFunc -> Image -> Delta -> (Delta, Layer)
 deactivate f im delta
-  | c == [0.0]  = (zipWith (*) delta f', ActLayer relu')
+  | c == [0.0]  = (dl', ActLayer relu')
   | c == [1.0]  = ([], ActLayer f)
   | otherwise = ([], ActLayer f)
   where
     c = f [0.0]
-    f' = relu' (head $ head im)
+    f' = map (map relu') im
+    dl' = zipWith (zipWith (zipWith (*))) delta f'
 
 reverseActFunc :: ActFunc -> Layer
 reverseActFunc relu = ActLayer step

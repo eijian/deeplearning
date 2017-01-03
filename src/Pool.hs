@@ -49,18 +49,14 @@ initSamplePool c (sx, sy) o p n = do
       cl = i `mod` o  -- class of this image
 
     -- Image data
-    s1 <- forM [1..c] $ \j -> do
-      s2 <- forM [0..(sy-1)] $ \y -> do
+    s1 <- forM [1..c] $ \j ->
+      forM [0..(sy-1)] $ \y -> do
         let
-          p' = if y `div` st == cl then p else (1-p)
-        s3 <- forM [1..sx] $ \x -> do
-          a <- pixel p'
-          return a
-        return s3
-      return s2
+          p' = if y `div` st == cl then p else 1-p
+        forM [1..sx] $ \x -> pixel p'
 
     -- Trainer data
-    e1 <- forM [0..(o-1)] $ \j -> do
+    e1 <- forM [0..(o-1)] $ \j ->
       return $ if j == cl then 1.0 else 0.0
     return (s1, e1)
 
@@ -81,8 +77,8 @@ instance Pool MemPool where
       mx0 = o + b - 1
       mx2 = mx0 - s
       mx1 = if mx2 < 0 then mx0 else s - 1
-      im0 = mapMaybe (\x -> Map.lookup x m) [o..mx1]
-      im1 = mapMaybe (\x -> Map.lookup x m) [0..mx2]
+      im0 = mapMaybe (`Map.lookup` m) [o..mx1]
+      im1 = mapMaybe (`Map.lookup` m) [0..mx2]
     return (im0 ++ im1)
 
   nSample (MemPool m) = Map.size m

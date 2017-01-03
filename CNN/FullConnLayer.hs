@@ -12,6 +12,7 @@ module CNN.FullConnLayer (
 ) where
 
 import Control.Monad hiding (msum)
+--import Data.List
 import Debug.Trace
 import System.Random.Mersenne as MT
 
@@ -38,11 +39,7 @@ initFilterF
 -}
 
 initFilterF :: Int -> Int -> IO [FilterF]
-initFilterF k c = do
-  f <- forM [1..k] $ \i -> do
-    f' <- initKernel c
-    return f'
-  return f
+initFilterF k c = forM [1..k] $ \i -> initKernel c
   where
     a = 1.0 / fromIntegral c
     --a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
@@ -54,8 +51,7 @@ initFilterF k c = do
       return (0.0:w)
 
 zeroFilterF :: Int -> Int -> IO [FilterF]
-zeroFilterF k c = do
-  return $ take k $ repeat (take c $ repeat 0.0)
+zeroFilterF k c = return $ replicate k (replicate c 0.0)
      
 --
 
@@ -97,23 +93,24 @@ deconnect
   OUT: difference and updated layer
 
 >>> let im = [[[1.0, 2.0, 3.0]]]
->>> let delta = [1.0, 2.0]
+>>> let delta = [[[1.0, 2.0]]]
 >>> let fs = [[1.0, 2.0],[3.0,4.0],[5.0,6.0]]
 >>> let (d,l) = deconnect fs im delta
 >>> d
-[11.0,17.0]
+[[[11.0,17.0]]]
 >>> l
 FullConnLayer:[[1.0,1.0,2.0,3.0],[2.0,2.0,4.0,6.0]]
 
 -}
 
 deconnect :: [FilterF] -> Image -> Delta -> (Delta, Layer)
-deconnect fs im delta = (mmul delta fs', FullConnLayer $ calcDiff delta im')
+deconnect fs im delta = ([[mmul dl fs']], FullConnLayer $ calcDiff dl im')
   where
+    dl  = head $ head delta
     fs' = tail fs
     im' = head $ head im
 
-calcDiff :: Delta -> [Double] -> [FilterF]
+calcDiff :: [Double] -> [Double] -> [FilterF]
 calcDiff delta im = map (mulImage im') delta
   where
     im' = 1.0:im
@@ -130,12 +127,11 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 updateFullConnFilter :: [FilterF] -> Double -> [Layer] -> Layer
 updateFullConnFilter fs lr dl = FullConnLayer fs'
   where
-    ms = strip dl
-    delta = mscale (lr / (fromIntegral $ length ms))  $ msum ms
+    delta = mscale (lr / fromIntegral (length dl)) (msum $ strip dl)
     fs' = msub fs delta
 
 strip :: [Layer] -> [[FilterF]]
 strip [] = []
-strip ((FullConnLayer fs):ds) = fs:strip ds
+strip (FullConnLayer fs:ds) = fs:strip ds
 strip (_:ds) = strip ds
 
