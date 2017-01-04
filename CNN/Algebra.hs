@@ -18,6 +18,8 @@ module CNN.Algebra (
 , transpose
 ) where
 
+import Data.List (foldl')
+
 -- VECTOR FUNCTIONS
 
 vadd :: [Double] -> [Double] -> [Double]
@@ -92,9 +94,8 @@ msum
 -}
 
 msum :: [[[Double]]] -> [[Double]]
-msum = foldr madd []
---msum [] = []
---msum (n:ns) = madd n (msum ns)
+--msum = foldr madd []
+msum = foldl' madd []
 
 {- |
 mscale
