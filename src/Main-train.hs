@@ -1,6 +1,7 @@
 --
 -- CNN : CNN filter generator
 --
+--{-# LANGUAGE BangPatterns #-}
 
 module Main (
   main
