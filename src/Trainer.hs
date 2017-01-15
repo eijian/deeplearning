@@ -47,10 +47,10 @@ update
 
 -}
 
-update :: Double -> [[Layer]] -> [Layer] -> [Layer]
-update lr _ [] = []
-update lr [] ls = ls
-update lr (dl:dls) (l:ls) = updateLayer lr l dl : update lr dls ls
+update :: Double -> [Layer] -> [[Layer]] -> [Layer]
+update lr [] _  = []
+update lr ls [] = ls
+update lr (l:ls) (dl:dls) = updateLayer lr l dl : update lr ls dls
 
 {-
 evaluate

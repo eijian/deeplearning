@@ -47,5 +47,5 @@ reverseLayer l@(FlattenLayer _ _) = l
 updateLayer :: Double -> Layer -> [Layer] -> Layer
 updateLayer lr (ConvLayer s fs)   dl = updateConvFilter s fs lr dl
 updateLayer lr (FullConnLayer fs) dl = updateFullConnFilter fs lr dl
-updateLayer lr l                  dl = l
+updateLayer lr l                  _  = l
 

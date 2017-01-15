@@ -82,12 +82,15 @@ convolveImage s im (ks, b) = sumPlains b (zipWith (convolvePlain s) ks im)
 
 sumPlains :: Double -> [Plain] -> Plain
 sumPlains b [] = repeat $ repeat b  -- 2 Dimensions (X*Y)
+sumPlains b (p:ps) = zipWith (zipWith (+)) p (sumPlains b ps)
+{-
 sumPlains b (p:ps) = zipWith f p (sumPlains b ps)
   where
     f :: [Double] -> [Double] -> [Double]
     f [] _          = []
     f (a:[]) (b:_)  = [a + b]
     f (a:as) (b:bs) = (a + b) : f as bs
+-}
 
 {- |
 convolvePlain

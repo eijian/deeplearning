@@ -45,7 +45,7 @@ main = do
   putStrLn "Training the model..."
   putF 0 (layers st) sampleE
   --layers' <- trainLoop getTeachers sampleE putF (learnR st) (layers st) is
-  layers' <- foldM' loopFunc (layers st) is
+  layers' <- foldM loopFunc (layers st) is
 
   putStrLn "Saving status..."
   saveStatus "" st layers'
@@ -82,6 +82,7 @@ trainLoop
 
 -}
 
+{-
 trainLoop :: (Int -> IO [Trainer]) -> [Trainer]
   -> (Int -> [Layer] -> [Trainer] -> IO ()) -> Double -> [Layer] -> [Int]
   -> IO [Layer]
@@ -92,9 +93,10 @@ trainLoop getT se putF lr ls (i:is) = do
   let
     rls = tail $ map reverseLayer $ reverse ls'    -- fist element isn't used
     dls = map (train ls' rls) teachers
-    ls'' = update lr (transpose dls) ls'           -- dls = diff of layers
+    ls'' = update lr ls' (transpose dls)     -- dls = diff of layers
   putF i ls'' se
   return ls''
+-}
 
 trainLoop' :: (Int -> IO [Trainer]) -> [Trainer]
   -> (Int -> [Layer] -> [Trainer] -> IO ()) -> Double -> [Layer] -> Int
@@ -110,7 +112,7 @@ updateLayers
 -}
 
 updateLayers :: Double -> [Trainer] -> [Layer] -> [Layer]
-updateLayers lr ts ls = update lr (transpose dls) ls
+updateLayers lr ts ls = update lr ls (transpose dls)
   where
     rls = tail $ map reverseLayer $ reverse ls    -- fist element isn't used
     dls = map (train ls rls) ts             -- dls = diff of layers

@@ -78,7 +78,7 @@ max' [x] = x
 max' (x:xs) = maximum' x (max' xs)
 
 maximum' :: Pix -> Pix -> Pix
-maximum' a@(v1, i1) b@(v2, i2) = if v1 < v2 then b else a
+maximum' a@(v1, _) b@(v2, _) = if v1 < v2 then b else a
 
 -- back prop
 
