@@ -13,6 +13,7 @@ module CNN.FullConnLayer (
 
 import Control.Monad hiding (msum)
 --import Data.List
+import Data.Maybe
 import Debug.Trace
 import System.Random.Mersenne as MT
 
@@ -103,8 +104,8 @@ FullConnLayer:[[1.0,1.0,2.0,3.0],[2.0,2.0,4.0,6.0]]
 
 -}
 
-deconnect :: [FilterF] -> Image -> Delta -> (Delta, Layer)
-deconnect fs im delta = ([[mmul dl fs']], FullConnLayer $ calcDiff dl im')
+deconnect :: [FilterF] -> Image -> Delta -> (Delta, Maybe Layer)
+deconnect fs im delta = ([[mmul dl fs']], Just (FullConnLayer $ calcDiff dl im'))
   where
     dl  = head $ head delta
     fs' = tail fs
@@ -124,10 +125,13 @@ reverseFullConnFilter fs = FullConnLayer $ transpose fs
 
 -- update filter
 
-updateFullConnFilter :: [FilterF] -> Double -> [Layer] -> Layer
-updateFullConnFilter fs lr dl = FullConnLayer fs'
+updateFullConnFilter :: [FilterF] -> Double -> [Maybe Layer] -> Layer
+updateFullConnFilter fs lr dl
+  | dl' == [] = FullConnLayer fs
+  | otherwise = FullConnLayer fs'
   where
-    delta = mscale (lr / fromIntegral (length dl)) (msum $ strip dl)
+    dl' = catMaybes dl
+    delta = mscale (lr / fromIntegral (length dl')) (msum $ strip dl')
     fs' = msub fs delta
 
 strip :: [Layer] -> [[FilterF]]

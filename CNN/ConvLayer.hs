@@ -141,8 +141,8 @@ convolveLine s k ps
 
 -- back prop
 
-deconvolve :: Int -> [FilterC] -> Image -> Delta -> (Delta, Layer)
-deconvolve s fs im d = (delta, ConvLayer s (zip dw db))
+deconvolve :: Int -> [FilterC] -> Image -> Delta -> (Delta, Maybe Layer)
+deconvolve s fs im d = (delta, Just (ConvLayer s (zip dw db)))
   where
     delta = convolve s fs $ addBorder s d
     db = map (sum . map sum) d  -- delta B
@@ -260,12 +260,15 @@ reverseConvFilter s fs = ConvLayer s (zip rv (repeat 0.0))
 
 -- update
 
-updateConvFilter :: Int -> [FilterC] -> Double -> [Layer] -> Layer
-updateConvFilter s fs lr dl = ConvLayer s $ zip ks' bs'
+updateConvFilter :: Int -> [FilterC] -> Double -> [Maybe Layer] -> Layer
+updateConvFilter s fs lr dl
+  | dl' == [] = ConvLayer s fs
+  | otherwise = ConvLayer s $ zip ks' bs'
   where
-    sc = lr / fromIntegral (length dl)
+    dl' = catMaybes dl
+    sc = lr / fromIntegral (length dl')
     (ks , bs ) = unzip fs
-    (kss, bss) = unzip $ map unzip $ strip dl
+    (kss, bss) = unzip $ map unzip $ strip dl'
     dbs = vscale sc $ vsum bss
     dks = map (mscale sc . msum) $ transpose kss
     bs' = vsub bs dbs

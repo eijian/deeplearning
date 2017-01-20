@@ -92,8 +92,8 @@ depoolMax
 
 -}
 
-depoolMax :: Int -> Image -> Delta -> (Delta, Layer)
-depoolMax s im d = (zipWith (concatWith (expand s 0.0)) im d, MaxPoolLayer s)
+depoolMax :: Int -> Image -> Delta -> (Delta, Maybe Layer)
+depoolMax s im d = (zipWith (concatWith (expand s 0.0)) im d, Nothing)
   where
     concatWith :: ([Int] -> [Double] -> [[Double]])
                ->  [[Double]] -> [[Double]] -> [[Double]]

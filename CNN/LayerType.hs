@@ -57,5 +57,3 @@ instance Eq Layer where
 
 
 
-
-

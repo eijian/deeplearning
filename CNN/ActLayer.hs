@@ -115,11 +115,11 @@ deactivate
 -}
 
 
-deactivate :: ActFunc -> Image -> Delta -> (Delta, Layer)
+deactivate :: ActFunc -> Image -> Delta -> (Delta, Maybe Layer)
 deactivate f im delta
-  | c == [0.0]  = (dl', ActLayer relu')
-  | c == [1.0]  = ([], ActLayer f)
-  | otherwise = ([], ActLayer f)
+  | c == [0.0] = (dl', Nothing)
+  | c == [1.0] = ([] , Nothing)
+  | otherwise  = ([] , Nothing)
   where
     c = f [0.0]
     f' = map (map relu') im

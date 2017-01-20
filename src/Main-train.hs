@@ -1,12 +1,13 @@
 --
 -- CNN : CNN filter generator
 --
---{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns #-}
 
 module Main (
   main
 ) where
 
+import Control.DeepSeq
 import Control.Monad
 --import Data.List
 import Data.Time
@@ -45,7 +46,7 @@ main = do
   putStrLn "Training the model..."
   putF 0 (layers st) sampleE
   --layers' <- trainLoop getTeachers sampleE putF (learnR st) (layers st) is
-  layers' <- foldM loopFunc (layers st) is
+  layers' <- foldM' loopFunc (layers st) is
 
   putStrLn "Saving status..."
   saveStatus "" st layers'
@@ -62,7 +63,7 @@ foldM' : monadic version of foldl'
 
 -}
 
-foldM' :: (Monad m) => (a -> b -> m a) -> a -> [b] -> m a
+foldM' :: (Monad m) => ([a] -> b -> m [a]) -> [a] -> [b] -> m [a]
 foldM' _ z [] = return z
 foldM' f z (x:xs) = do
   z' <- f z x

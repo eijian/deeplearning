@@ -28,7 +28,7 @@ train
 
 -}
 
-train :: [Layer] -> [Layer] -> Trainer -> [Layer]
+train :: [Layer] -> [Layer] -> Trainer -> [Maybe Layer]
 train [] _ (i, c) = []
 train ls rls (i, c) = dls
   where
@@ -47,7 +47,7 @@ update
 
 -}
 
-update :: Double -> [Layer] -> [[Layer]] -> [Layer]
+update :: Double -> [Layer] -> [[Maybe Layer]] -> [Layer]
 update lr [] _  = []
 update lr ls [] = ls
 update lr (l:ls) (dl:dls) = updateLayer lr l dl : update lr ls dls
@@ -98,7 +98,8 @@ backwardProp
 
 -}
 
-backwardProp :: [(Image, Layer)] -> (Delta, [Layer]) -> (Delta, [Layer])
+backwardProp :: [(Image, Layer)] -> (Delta, [Maybe Layer])
+             -> (Delta, [Maybe Layer])
 backwardProp [] (_, ls) = ([], ls)
 backwardProp ((im,l):ols) (d, ls) = backwardProp ols (d', l':ls)
   where
