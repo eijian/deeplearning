@@ -142,12 +142,13 @@ convolveLine s k ps
 -- back prop
 
 deconvolve :: Int -> [FilterC] -> Image -> Delta -> (Delta, Maybe Layer)
-deconvolve s fs im d = (delta, Just (ConvLayer s (zip dw db)))
+deconvolve s fs im d = (delta, Just (ConvLayer s dw))
   where
     delta = convolve s fs $ addBorder s d
-    db = map (sum . map sum) d  -- delta B
     sim = slideImage s im
+    --sim = replicate (s * s) im
     dw = map (hadamard sim) d
+    --dw = replicate (length d) (replicate (length im) (replicate (s*s) 0.0), 0.0)
 
 {- |
 addBorder
@@ -168,7 +169,7 @@ addBorder s d = map ab d
     xb = replicate (s - 1) 0.0
     l  = length (head $ head d) + (s - 1) * 2
     yb = replicate (s - 1) (replicate l 0.0)
-    ab :: [[Double]] -> [[Double]]
+    ab :: Plain -> Plain
     ab y = yb ++ map (\x -> xb ++ x ++ xb) y ++ yb
 
 {- |
@@ -233,8 +234,11 @@ hadamard
 
 -}
 
-hadamard :: [[Plain]] -> Plain -> [[Double]]
-hadamard sim ds = map (map (mdot ds)) sim
+hadamard :: [[Plain]] -> Plain -> FilterC
+hadamard sim ds = (w, b)
+  where
+    b = sum $ map sum ds
+    w = map (map (mdot ds)) sim
 
 {- |
 reverseConvFilter

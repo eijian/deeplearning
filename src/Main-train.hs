@@ -37,7 +37,6 @@ main = do
   tm0 <- getCurrentTime
 
   let
-    --is = [(epoch_ed st), (epoch_ed st - 1) .. (epoch_st st)]
     is = [(epoch_st st) .. (epoch_ed st)]
     getTeachers = getImages (poolT st) (batch st)
     putF = putStatus tm0 (epoch_st st) (epoch_ed st) (opstep st)
@@ -45,7 +44,6 @@ main = do
 
   putStrLn "Training the model..."
   putF 0 (layers st) sampleE
-  --layers' <- trainLoop getTeachers sampleE putF (learnR st) (layers st) is
   layers' <- foldM' loopFunc (layers st) is
 
   putStrLn "Saving status..."
@@ -81,22 +79,6 @@ trainLoop
 
   OUT: updated layers
 
--}
-
-{-
-trainLoop :: (Int -> IO [Trainer]) -> [Trainer]
-  -> (Int -> [Layer] -> [Trainer] -> IO ()) -> Double -> [Layer] -> [Int]
-  -> IO [Layer]
-trainLoop _ _ _ _ ls []             = return ls
-trainLoop getT se putF lr ls (i:is) = do
-  ls' <- trainLoop getT se putF lr ls is
-  teachers <- getT i
-  let
-    rls = tail $ map reverseLayer $ reverse ls'    -- fist element isn't used
-    dls = map (train ls' rls) teachers
-    ls'' = update lr ls' (transpose dls)     -- dls = diff of layers
-  putF i ls'' se
-  return ls''
 -}
 
 trainLoop' :: (Int -> IO [Trainer]) -> [Trainer]
@@ -147,4 +129,3 @@ putStatus tm0 eps epe step i ls se
     where
       putOne :: ([Double], Double) -> IO ()
       putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
-
