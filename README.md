@@ -9,4 +9,6 @@ deep learning trial
 * git checkout master
 * git merge <branch name>
 * git push
+* git tag <version>
+* git push origin <version>
 
