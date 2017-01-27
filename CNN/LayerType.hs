@@ -13,18 +13,20 @@ module CNN.LayerType (
         , FlattenLayer)
 ) where
 
+import Numeric.LinearAlgebra.Data
+
 import CNN.Image
 
 -- for Activation Layer
-type ActFunc = [Double] -> [Double]
+type ActFunc = Matrix R -> Matrix R
 
 -- filter for Convolution Layer
-type Kernel = [[Double]]
+type Kernel = [Matrix R]
 type Bias   = Double
 type FilterC = (Kernel, Bias)
 
 -- filter for Fully Connected Layer
-type FilterF = [Double]
+type FilterF = Matrix R
 
 -- for backward propergation
 --type Delta = [Double]
@@ -35,7 +37,7 @@ data Layer =
   | ActLayer ActFunc
   | MaxPoolLayer Int
   | ConvLayer Int [FilterC]
-  | FullConnLayer [FilterF]
+  | FullConnLayer FilterF
   | FlattenLayer Int Int
 
 instance Show Layer where

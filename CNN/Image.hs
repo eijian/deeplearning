@@ -10,11 +10,12 @@ module CNN.Image (
 ) where
 
 import qualified Data.Map as M
+import Numeric.LinearAlgebra.Data
 
-type Plain = [[Double]]    -- 2D: X x Y pixels
+type Plain = Matrix R    -- 2D: X x Y pixels
 type Image = [Plain]     -- n dimension
 
-type Class = [Double]    -- teacher vector
+type Class = Vector R    -- teacher vector
 
 type Trainer = (Image, Class)
 
