@@ -21,7 +21,7 @@ import CNN.Image
 type ActFunc = Matrix R -> Matrix R
 
 -- filter for Convolution Layer
-type Kernel = [Matrix R]
+type Kernel = Matrix R
 type Bias   = Double
 type FilterC = (Kernel, Bias)
 

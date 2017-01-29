@@ -15,6 +15,7 @@ import Control.Monad hiding (msum)
 --import Data.List
 import Data.Maybe
 import Debug.Trace
+import Numeric.LinearAlgebra
 import System.Random.Mersenne as MT
 
 import CNN.Algebra
@@ -32,27 +33,27 @@ initFilterF
   OUT: filter of fully connected layer
 
 >>> f <- initFilterF 3 20
->>> length f
+>>> rows f
 3
->>> length $ head f
+>>> cols f
 21
 
 -}
 
-initFilterF :: Int -> Int -> IO [FilterF]
-initFilterF k c = forM [1..k] $ \i -> initKernel c
+initFilterF :: Int -> Int -> IO FilterF
+initFilterF k c = do
+  rs <- forM [1..k] $ \i -> do
+    w <- forM [1..c] $ \j -> do
+      r <- MT.randomIO :: IO Double
+      return ((r * 2.0 - 1.0) * a)
+    return (0.0:w)
+  return $ fromLists rs
   where
     a = 1.0 / fromIntegral c
     --a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
-    initKernel :: Int -> IO FilterF
-    initKernel c = do
-      w <- forM [1..c] $ \i -> do
-        r <- MT.randomIO :: IO Double
-        return ((r * 2.0 - 1.0) * a)
-      return (0.0:w)
 
-zeroFilterF :: Int -> Int -> IO [FilterF]
-zeroFilterF k c = return $ replicate k (replicate c 0.0)
+zeroFilterF :: Int -> Int -> IO FilterF
+zeroFilterF k c = return $ (k><(c+1)) [0.0 ..]
      
 --
 
@@ -64,23 +65,21 @@ connect
 
   OUT: updated image
 
->>> let fs = [[0.5,1.0,2.0,3.0],[0.1,4.0,5.0,6.0]]
->>> let im = [[[9.0,8.0,7.0]]]
+>>> let fs = fromLists [[0.5,1.0,2.0,3.0],[0.1,4.0,5.0,6.0]]
+>>> let im = [fromLists [[9.0,8.0,7.0]]]
 >>> connect fs im
-[[[46.5,118.1]]]
->>> let fs2 = []
->>> connect fs2 im
-*** Exception: invalid FilterF
+[(1><2)
+ [ 46.5, 118.1 ]]
 >>> connect fs []
 *** Exception: invalid Image
 
 -}
 
-connect :: [FilterF] -> Image -> Image
-connect [] _ = error "invalid FilterF"
+connect :: FilterF -> Image -> Image
 connect _ [] = error "invalid Image"
-connect fs [[im]] = [[map (vdot (1.0:im)) fs]]
-connect _ [im] = error ("invalid Image 2:" ++ show im)
+connect fs [im] = [reshape (rows fs) $ fs #> v]
+  where
+    v = vjoin [konst 1.0 1, flatten im]
 
 -- back prop
 
@@ -93,39 +92,36 @@ deconnect
 
   OUT: difference and updated layer
 
->>> let im = [[[1.0, 2.0, 3.0]]]
->>> let delta = [[[1.0, 2.0]]]
->>> let fs = [[1.0, 2.0],[3.0,4.0],[5.0,6.0]]
+>>> let im = [fromLists [[1.0, 2.0, 3.0]]]
+>>> let delta = [fromLists [[1.0, 2.0]]]
+>>> let fs = fromLists [[1.0, 2.0],[3.0,4.0],[5.0,6.0]]
 >>> let (d,l) = deconnect fs im delta
 >>> d
-[[[11.0,17.0]]]
+[(1><2)
+ [ 11.0, 17.0 ]]
 >>> l
-FullConnLayer:[[1.0,1.0,2.0,3.0],[2.0,2.0,4.0,6.0]]
+Just FullConnLayer:(2><4)
+ [ 1.0, 1.0, 2.0, 3.0
+ , 2.0, 2.0, 4.0, 6.0 ]
 
 -}
 
-deconnect :: [FilterF] -> Image -> Delta -> (Delta, Maybe Layer)
-deconnect fs im delta = ([[mmul dl fs']], Just (FullConnLayer $ calcDiff dl im'))
+deconnect :: FilterF -> Image -> Delta -> (Delta, Maybe Layer)
+deconnect fs im delta = ([reshape (rows fs') $ fs' #> dl]
+                        , Just (FullConnLayer $ outer dl im'))
   where
-    dl  = head $ head delta
-    fs' = tail fs
-    im' = head $ head im
-
-calcDiff :: [Double] -> [Double] -> [FilterF]
-calcDiff delta im = map (mulImage im') delta
-  where
-    im' = 1.0:im
-    mulImage :: [Double] -> Double -> [Double]
-    mulImage im d = map (*d) im'
+    dl  = flatten $ head delta    -- to Vector
+    fs' = dropRows 1 fs
+    im' = vjoin [konst 1.0 1, flatten $ head im]
 
 -- reverse
 
-reverseFullConnFilter :: [FilterF] -> Layer
-reverseFullConnFilter fs = FullConnLayer $ transpose fs
+reverseFullConnFilter :: FilterF -> Layer
+reverseFullConnFilter fs = FullConnLayer $ tr' fs
 
 -- update filter
 
-updateFullConnFilter :: [FilterF] -> Double -> [Maybe Layer] -> Layer
+updateFullConnFilter :: FilterF -> Double -> [Maybe Layer] -> Layer
 updateFullConnFilter fs lr dl
   | dl' == [] = FullConnLayer fs
   | otherwise = FullConnLayer fs'
@@ -134,7 +130,7 @@ updateFullConnFilter fs lr dl
     delta = mscale (lr / fromIntegral (length dl')) (msum $ strip dl')
     fs' = msub fs delta
 
-strip :: [Layer] -> [[FilterF]]
+strip :: [Layer] -> [FilterF]
 strip [] = []
 strip (FullConnLayer fs:ds) = fs:strip ds
 strip (_:ds) = strip ds
