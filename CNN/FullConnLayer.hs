@@ -52,7 +52,7 @@ initFilterF k c = forM [1..k] $ \i -> initKernel c
       return (0.0:w)
 
 zeroFilterF :: Int -> Int -> IO [FilterF]
-zeroFilterF k c = return $ replicate k (replicate c 0.0)
+zeroFilterF k c = return $ replicate k (replicate (c+1) 0.0)
      
 --
 
