@@ -53,7 +53,7 @@ initFilterF k c = do
     --a = 4.0 * sqrt (6.0 / fromIntegral (c + k))
 
 zeroFilterF :: Int -> Int -> IO FilterF
-zeroFilterF k c = return $ (k><(c+1)) [0.0 ..]
+zeroFilterF k c = return $ (k><(c+1)) $ repeat 0.0
      
 --
 
