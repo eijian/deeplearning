@@ -12,6 +12,7 @@ module Pool (
 import           Control.Monad
 import qualified Data.Map               as Map
 import           Data.Maybe
+import           Numeric.LinearAlgebra
 import qualified System.Random.Mersenne as MT
 
 import CNN.Image
@@ -49,16 +50,16 @@ initSamplePool c (sx, sy) o p n = do
       cl = i `mod` o  -- class of this image
 
     -- Image data
-    s1 <- forM [1..c] $ \j ->
-      forM [0..(sy-1)] $ \y -> do
+    s1 <- forM [1..c] $ \j -> do
+      w <-forM [0..(sy-1)] $ \y -> do
         let
           p' = if y `div` st == cl then p else 1-p
         forM [1..sx] $ \x -> pixel p'
-
+      return $ fromLists w
     -- Trainer data
     e1 <- forM [0..(o-1)] $ \j ->
       return $ if j == cl then 1.0 else 0.0
-    return (s1, e1)
+    return (s1, fromList e1)
 
   return (MemPool (Map.fromList $ zip [0..] s0))
   where

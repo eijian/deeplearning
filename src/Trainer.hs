@@ -11,6 +11,7 @@ module Trainer (
 
 import Control.Monad
 import Debug.Trace
+import Numeric.LinearAlgebra
 
 import CNN.Algebra
 import CNN.Image
@@ -33,7 +34,7 @@ train [] _ (i, c) = []
 train ls rls (i, c) = dls
   where
     (y, op') = splitAt 1 $ forwardProp ls [i]
-    d = [[head (head $ head y) `vsub` c]]
+    d = [reshape (size c) ((flatten $ head $ head y) `vsub` c)]
     (_, dls) = backwardProp (zip (tail op') rls) (d, [])
 
 {-
@@ -63,12 +64,12 @@ evaluate
 
 -}
 
-evaluate :: [Layer] -> [Trainer] -> [([Double], Double)]
+evaluate :: [Layer] -> [Trainer] -> [(Vector R, Double)]
 evaluate _ [] = []
 evaluate ls (s:ss) = (op, rt) : evaluate ls ss
   where
-    op = head $ head (head $ forwardProp ls [fst s])
-    rt = sum $ zipWith (*) (snd s) op
+    op = flatten $ head (head $ forwardProp ls [fst s])
+    rt = (snd s) <.> op
 
 ---
 

@@ -10,23 +10,27 @@ module CNN.ActLayer (
 , reverseActFunc
 ) where
 
+import Numeric.LinearAlgebra hiding (step)
+import CNN.Algebra
 import CNN.Image
 import CNN.LayerType
 
 {- |
 step
 
-  IN : array of Double
+  IN : matrix
 
-  OUT: array of Double
+  OUT: matrix
 
->>> step [1.0, 0.0, (-1.1), (-0.5), 2.1]
-[1.0,0.0,0.0,0.0,1.0]
+>>> let m = fromLists [[1.0, 0.0, (-1.1), (-0.5), 2.1]] :: Matrix R
+>>> step m
+(1><5)
+ [ 1.0, 0.0, 0.0, 0.0, 1.0 ]
 
 -}
 
 step :: ActFunc
-step = map f
+step = cmap f
   where
     f :: Double -> Double
     f a = if a > 0.0 then 1.0 else 0.0
@@ -38,13 +42,14 @@ relu
 
   OUT: array of Double
 
->>> relu [1.0, 0.0, (-1.1), (-0.5), 2.1]
-[1.0,0.0,0.0,0.0,2.1]
+>>> relu $ fromLists [[1.0, 0.0, (-1.1), (-0.5), 2.1]]
+(1><5)
+ [ 1.0, 0.0, 0.0, 0.0, 2.1 ]
 
 -}
 
 relu :: ActFunc
-relu = map (`max` 0.0)
+relu = cmap (`max` 0.0)
 
 {- |
 relu'
@@ -53,13 +58,14 @@ relu'
 
   OUT: array of Double
 
->>> relu' [1.0, 0.0, (-1.1), (-0.5), 2.1]
-[1.0,0.0,0.0,0.0,1.0]
+>>> relu' $ fromLists [[1.0, 0.0, (-1.1), (-0.5), 2.1]]
+(1><5)
+ [ 1.0, 0.0, 0.0, 0.0, 1.0 ]
 
 -}
 
 relu' :: ActFunc
-relu' = map (\x -> if x > 0.0 then 1.0 else 0.0)
+relu' = cmap (\x -> if x > 0.0 then 1.0 else 0.0)
 
 {- |
 softmax
@@ -68,24 +74,24 @@ softmax
 
   OUT: normalized array of Double
 
->>> let a1 = softmax [1.0, 1.0, 1.0]
->>> a1!!0 * 3.0
+>>> let a1 = softmax $ fromLists [[1.0, 1.0, 1.0]]
+>>> (a1 `atIndex` (0,0)) * 3.0
 1.0
->>> let a2 = softmax [1.0, 3.0, 2.0]
->>> a2!!0 < a2!!1
+>>> let a2 = softmax $ fromLists [[1.0, 3.0, 2.0]]
+>>> (a2 `atIndex` (0,0)) < (a2 `atIndex` (0,1))
 True
->>> a2!!0 < a2!!2
+>>> (a2 `atIndex` (0,0)) < (a2 `atIndex` (0,2))
 True
->>> a2!!1 > a2!!2
+>>> (a2 `atIndex` (0,1)) > (a2 `atIndex` (0,2))
 True
 -}
 
 softmax :: ActFunc
-softmax as = map (/ sume) es
+softmax as = mscale (1.0 / sume) es
   where
-    amax = maximum as
-    es   = map (\x -> exp (x - amax)) as
-    sume = sum es
+    amax = maxElement as
+    es   = cmap (\x -> exp (x - amax)) as
+    sume = sumElements es
 
 {-
 activate
@@ -98,7 +104,7 @@ activate
 -}
 
 activate :: ActFunc -> Image -> Image
-activate f = map (map f)
+activate f = map f
 
 {- |
 deactivate
@@ -109,21 +115,26 @@ deactivate
 
   OUT: difference and updated layer
 
->>> fst $ deactivate relu [[[1.5,(-2.0)]]] [[[0.5,0.1]]]
-[[[0.5,0.0]]]
+>>> fst $ deactivate relu [fromLists [[1.5,(-2.0)]]] [fromLists [[0.5,0.1]]]
+[(1><2)
+ [ 0.5, 0.0 ]]
 
 -}
 
+m0 :: Matrix R
+m0 = fromLists [[0.0]]
+m1 :: Matrix R
+m1 = fromLists [[1.0]]
 
 deactivate :: ActFunc -> Image -> Delta -> (Delta, Maybe Layer)
 deactivate f im delta
-  | c == [0.0] = (dl', Nothing)
-  | c == [1.0] = ([] , Nothing)
-  | otherwise  = ([] , Nothing)
+  | c == m0   = (dl', Nothing)
+  | c == m1   = ([] , Nothing)
+  | otherwise = ([] , Nothing)
   where
-    c = f [0.0]
-    f' = map (map relu') im
-    dl' = zipWith (zipWith (zipWith (*))) delta f'
+    c = f m0
+    f' = map relu' im
+    dl' = zipWith (*) delta f'
 
 reverseActFunc :: ActFunc -> Layer
 reverseActFunc relu = ActLayer step
