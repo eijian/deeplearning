@@ -26,6 +26,7 @@ import Pool
 
 data Status = Status {
     layers   :: [Layer]
+  , lnames   :: [String]
   , learnR   :: Double
   , batch    :: Int
   , epoch_st :: Int
@@ -92,8 +93,23 @@ staticStatus = do
       , ActLayer softmax
       ]
 
+    ln = [
+        "conv1"
+      , "act1"
+      , "pool1"
+      , "conv2"
+      , "act2"
+      , "pool2"
+      , "flat"
+      , "full1"
+      , "act3"
+      , "full2"
+      , "act4"
+      ]
+
     stat = Status {
         layers   = ls
+      , lnames   = ln
       , learnR   = 0.1
       , batch    = 150
       , epoch_st = 1

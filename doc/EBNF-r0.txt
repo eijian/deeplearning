@@ -1,0 +1,86 @@
+EBNF for "train" (revision 0)
+
+  config = line , { line } ;
+  line   = space , param , linefeed ;
+  param  = general | layers ;
+
+  general = 'general:' , eol ,
+            sp2 , datadir ,
+            sp2 , img_x ,
+            sp2 , img_y ,
+            sp2 , ch_in ,
+            sp2 , class ,
+            sp2 , learningrate ,
+            sp2 , batchsize ,
+            sp2 , testsize ,
+            sp2 , opstep :
+  layers  = 'layers:', eol ,
+            layer , { layer } ;
+
+  layer       = convolution | activation | pooling | flatten | fullconnect ;
+  convolution = sp2 , 'convolution:' , eol ,
+                sp4 , name ,
+                sp4 , img_x ,
+                sp4 , img_y ,
+                sp4 , ch_in ,
+                sp4 , ch_out ,
+                sp4 , kern ,
+                sp4 , pool ;
+  activation  = sp2 , 'activation:' , eol ,
+                sp4 , name ,
+                sp4 , func ;
+  pooling     = sp2 , 'pooling:' , eol ,
+                sp4 , name ,
+                sp4 , size ;
+  flatten     = sp2 , 'flatten:' , eol ,
+                sp4 , name ,
+                sp4 , img_x ,
+                sp4 , img_y ;
+  fullconnect = sp2 , 'fullconnected:' , eol ,
+                sp4 , name ,
+                sp4 , ch_in ,
+                sp4 , ch_out ,
+                sp4 , init ;
+
+  datadir     = 'datadir:' , pstring ;
+  img_x       = 'img_x:' , pnatural ;
+  img_y       = 'img_y:' , pnatural ;
+  ch_in       = 'ch_in:' , pnatural ;
+  ch_out      = 'ch_out:' , pnatural ;
+  class       = 'class:' , pnatural ;
+  lerningrate = 'learningrate:' , pfloat ;
+  batchsize   = 'batchsize:' , pnatural ;
+  testsize    = 'testsize:' , pnatural ;
+  opstep      = 'opstep:' , pnatural ;
+  name        = 'name:' , pstring ;
+  kern        = 'kern:', pnatural ;
+  pool        = 'pool:', pnatural ;
+  func        = 'func:', ( relu | softmax ) ;
+  size        = 'size:' , pnatural ;
+  init        = 'init:', ( zero | rand ) ;
+
+  relu      = space , 'relu' , eol ;
+  softmax   = space , 'softmax' , eol ;
+  zero      = space , 'zero' , eol ;
+  rand      = space , 'rand' , eol ;
+
+  pstring   = space , string , { string } , eol ;
+  pfloat    = space , float , eol ;
+  pnatural  = space , natural , eol ;
+
+  string     = char , { char } ;
+  float      = ( natural | "0" ) , "." , { intdig } ;
+  natural    = naturalnum , { intdig } ;
+
+  char       = lalpha | ualpha | intdig | "_/.+-*?!#$%&()=@{}[]" ;
+  lalpha     = "a" | .. | "z" ;
+  ualpha     = "A" | .. | "Z" ;
+  intdig     = "0" | naturaldig
+  naturaldig = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+  sp2        = 2 * white_space ;
+  sp4        = 4 * white_space ;
+  eol        = space , linefeed ;
+  space      = white_space , { white_space } ;
+  white_space = '\x20' | '\x09' ;
+  linefeed    = '\x0a' | ( '\x0d' , '\x0a' ) ;

@@ -1,0 +1,61 @@
+---
+# Config for Deep Learning
+general:
+  datadir: /Users/eiji/tmp/dldata
+  img_x: 12
+  img_y: 12
+  ch_in: 1
+  class: 3
+  learningrate: 0.1
+  batchsize: 150
+  testsize: 30
+  opstep: 5
+layers:
+  convolution:
+    name: conv1
+    img_x: 12
+    img_y: 12
+    ch_in: 1
+    ch_out: 10
+    kern: 3
+    pool: 2
+  activation:
+    name: act1
+    func: relu
+  pooling:
+    name: pool1
+    size: 2
+  convolution:
+    name: conv2
+    img_x: 5
+    img_y: 5
+    ch_in: 10
+    ch_out: 20
+    kern: 2
+    pool: 2
+  activation:
+    name: act2
+    func: relu
+  pooling:
+    name: pool2
+    size: 2
+  flatten:
+    name: flat
+    img_x: 2
+    img_y: 2
+  fullconnect:
+    name: full1
+    ch_in: 80
+    ch_out: 20
+    init: rand
+  activation:
+    name: act3
+    func: relu
+  fullconnect:
+    name: full2
+    ch_in: 20
+    ch_out: 3
+    init: zero
+  activation:
+    name: act4
+    func: softmax
