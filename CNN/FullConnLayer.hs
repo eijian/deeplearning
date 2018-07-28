@@ -55,7 +55,7 @@ initFilterF k c = do
 
 zeroFilterF :: Int -> Int -> IO FilterF
 zeroFilterF k c = return $ (k><(c+1)) $ repeat 0.0
-     
+
 --
 
 {- |
@@ -73,6 +73,8 @@ connect
  [ 46.5, 118.1 ]]
 >>> connect fs []
 *** Exception: invalid Image
+CallStack (from HasCallStack):
+  error, called at CNN/FullConnLayer.hs:82:16 in main:CNN.FullConnLayer
 
 -}
 
@@ -135,4 +137,3 @@ strip :: [Layer] -> [FilterF]
 strip [] = []
 strip (FullConnLayer fs:ds) = fs:strip ds
 strip (_:ds) = strip ds
-

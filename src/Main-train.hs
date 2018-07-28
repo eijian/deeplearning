@@ -33,17 +33,17 @@ main :: IO ()
 main = do
   putStrLn "Initializing..."
   st <- loadStatus ""
-  sampleE <- getImages (poolE st) (ntest st) 1
   tm0 <- getCurrentTime
 
   let
-    is = [(epoch_st st) .. (epoch_ed st)]
-    getTeachers = getImages (poolT st) (batch st)
-    putF = putStatus tm0 (epoch_st st) (epoch_ed st) (opstep st)
-    loopFunc = trainLoop' getTeachers sampleE putF (learnR st)
+    is = [1 .. (repeatCt st)]
+    getTeachers = getImages (poolT st) (batchSz st)
+    getTests    = getImages (poolE st) (ntest st)
+    putF = putStatus tm0 st getTests
+    loopFunc = trainLoop' getTeachers putF (learnR st) (savePt st)
 
   putStrLn "Training the model..."
-  putF 0 (layers st) sampleE
+  putF 0 (layers st)
   layers' <- foldM' loopFunc (layers st) is
 
   putStrLn "Saving status..."
@@ -81,13 +81,14 @@ trainLoop
 
 -}
 
-trainLoop' :: (Int -> IO [Trainer]) -> [Trainer]
-  -> (Int -> [Layer] -> [Trainer] -> IO ()) -> Double -> [Layer] -> Int
-  -> IO [Layer]
-trainLoop' getT se putF lr ls i = do
+trainLoop' :: (Int -> IO [Trainer]) -> (Int -> [Layer] -> IO ()) -> Double
+           -> Int -> [Layer] -> Int -> IO [Layer]
+trainLoop' getT putF lr savep ls i = do
   teachers <- getT i
   let ls' = updateLayers lr teachers ls
-  putF i ls' se
+  if i `mod` savep == 0
+    then putF i ls'
+    else return ()
   return ls'
 
 {- |
@@ -113,19 +114,17 @@ putStatus
 
 -}
 
-putStatus :: UTCTime -> Int -> Int -> Int -> Int -> [Layer] -> [Trainer]
-          -> IO ()
-putStatus tm0 eps epe step i ls se
-  | i `mod` step /= 0 = putStr ""
-  | otherwise         = do
-    let
-      (rv, rr) = unzip $ evaluate ls se
-      ite = printf "iter = %5d/%d " (eps + i - 1) epe
-      acc = printf "accuracy = %.10f " (sum rr / fromIntegral (length rr))
-    putStr (ite ++ acc)
-    tm <- getCurrentTime
-    putStrLn ("time = " ++ show (diffUTCTime tm tm0))
-    --mapM_ putOne rs  
-    where
-      putOne :: ([Double], Double) -> IO ()
-      putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)
+putStatus :: UTCTime -> Status -> (Int -> IO [Trainer]) -> Int -> [Layer] -> IO ()
+putStatus tm0 st getE i ls = do
+  tests <- getE i
+  let
+    (rv, rr) = unzip $ evaluate ls tests
+    ite = printf "iter = %5d/%d " i (repeatCt st)
+    acc = printf "accuracy = %.10f " (sum rr / fromIntegral (length rr))
+  putStr (ite ++ acc)
+  tm <- getCurrentTime
+  putStrLn ("time = " ++ show (diffUTCTime tm tm0))
+  --mapM_ putOne rs   -- for debug
+  where
+    putOne :: ([Double], Double) -> IO ()
+    putOne (v, r) = putStrLn ("result:" ++ show v ++ ", ratio:" ++ show r)

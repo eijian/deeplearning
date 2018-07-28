@@ -5,12 +5,13 @@
 module Status (
   loadStatus
 , saveStatus
+, Status
 , layers
 , learnR
-, batch
-, epoch_st
-, epoch_ed
-, opstep
+, batchSz
+, ntrained
+, repeatCt
+, savePt
 , poolT
 , poolE
 , ntest
@@ -27,10 +28,10 @@ import Pool
 data Status = Status {
     layers   :: [Layer]
   , learnR   :: Double
-  , batch    :: Int
-  , epoch_st :: Int
-  , epoch_ed :: Int
-  , opstep   :: Int
+  , batchSz  :: Int
+  , ntrained :: Int
+  , repeatCt :: Int
+  , savePt   :: Int
   , poolT    :: MemPool
   , poolE    :: MemPool
   , ntest    :: Int
@@ -68,8 +69,8 @@ staticStatus = do
     n_hidden     = 20
     n_out = k
 
-  pt <- initSamplePool 1 (12, 12) 3 0.95 train_N
-  pe <- initSamplePool 1 (12, 12) 3 0.90 test_N
+  pt <- initSamplePool 1 (12, 12) 3 0.95 (train_N * 10)
+  pe <- initSamplePool 1 (12, 12) 3 0.90 (test_N * 10)
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
@@ -95,10 +96,10 @@ staticStatus = do
     stat = Status {
         layers   = ls
       , learnR   = 0.1
-      , batch    = 150
-      , epoch_st = 1
-      , epoch_ed = 500
-      , opstep   = 5
+      , batchSz  = 150
+      , ntrained = 0
+      , repeatCt = 500
+      , savePt   = 5
       , poolT    = pt
       , poolE    = pe
       , ntest    = m * k
@@ -120,4 +121,3 @@ saveStatus
 
 saveStatus :: String -> Status -> [Layer] -> IO ()
 saveStatus fname st ls = putStrLn ("saved to '" ++ fname ++ "'")
-
