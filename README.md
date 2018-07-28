@@ -4,11 +4,10 @@ deep learning trial
 
 ### make/merge a branch
 
-* git checkout -b <branch name>
-* git push origin <branch name>
+* git checkout -b _branch_name_
+* git push origin _branch_name_
 * git checkout master
-* git merge <branch name>
+* git merge _branch_name_
 * git push
-* git tag <version>
-* git push origin <version>
-
+* git tag _version_
+* git push origin _version_
