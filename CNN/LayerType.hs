@@ -40,14 +40,6 @@ data Layer =
   | FullConnLayer FilterF
   | FlattenLayer Int Int
 
-instance Show Layer where
-  show NopLayer           = "NopLayer"
-  show (ActLayer f)       = "ActLayer"
-  show (MaxPoolLayer s)   = "MaxPoolLayer:" ++ show s
-  show (ConvLayer s fs)   = "ConvLayer:" ++ show s
-  show (FullConnLayer fs) = "FullConnLayer:" ++ show fs
-  show (FlattenLayer x y) = "FlattenLayer:" ++ show x ++ "/" ++ show y
-
 instance Eq Layer where
   NopLayer             == NopLayer             = True
   (ActLayer f1)        == (ActLayer f2)        = True
@@ -56,6 +48,4 @@ instance Eq Layer where
   (FullConnLayer fs1)  == (FullConnLayer fs2)  = fs1 == fs2
   (FlattenLayer x1 y1) == (FlattenLayer x2 y2) = x1 == x2 && y1 == y2
   _                    == _                    = False
-
-
 

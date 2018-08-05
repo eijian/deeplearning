@@ -5,7 +5,9 @@
 module CNN.Layer (
   forwardLayer
 , backwardLayer
+, readLayer
 , reverseLayer
+, showFilter
 , updateLayer
 ) where
 
@@ -48,4 +50,26 @@ updateLayer :: Double -> Layer -> [Maybe Layer] -> Layer
 updateLayer lr (ConvLayer s fs)   dl = updateConvFilter s fs lr dl
 updateLayer lr (FullConnLayer fs) dl = updateFullConnFilter fs lr dl
 updateLayer _  l                  _  = l
+
+showFilter :: Layer -> String
+showFilter (ActLayer _)       = ""
+showFilter (MaxPoolLayer _)   = ""
+showFilter (ConvLayer _ fs)   = show fs
+showFilter (FullConnLayer fs) = show fs
+showFilter (NopLayer)         = ""
+showFilter (FlattenLayer _ _) = ""
+
+{-
+readLayer
+
+-}
+
+readLayer :: Layer -> String -> Layer
+readLayer l@(ConvLayer s _)   f =
+  if f /= "" then ConvLayer s (read f :: [FilterC])
+             else l
+readLayer l@(FullConnLayer _) f =
+  if f /= "" then FullConnLayer (read f :: FilterF)
+             else l
+readLayer l _                   = l
 

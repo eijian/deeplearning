@@ -12,6 +12,8 @@ import Control.Monad
 --import Data.List
 import Data.Time
 import Debug.Trace
+import System.Environment
+import System.IO
 import Text.Printf
 
 import CNN.ActLayer
@@ -27,12 +29,19 @@ import Pool
 import Status
 import Trainer
 
+usage :: String
+usage = "Usage: train <dir>"
+
 -- MAIN
 
 main :: IO ()
 main = do
+  as <- getArgs
+  dn <- if length as == 1
+    then return (as !! 0)
+    else error usage
   putStrLn "Initializing..."
-  st <- loadStatus ""
+  st <- loadStatus dn
   tm0 <- getCurrentTime
 
   let
@@ -47,7 +56,7 @@ main = do
   layers' <- foldM' loopFunc (layers st) is
 
   putStrLn "Saving status..."
-  saveStatus "" st layers'
+  saveStatus st layers'
   putStrLn "Finished!"
 
 --
@@ -105,6 +114,7 @@ updateLayers lr ts ls = update lr ls (transpose dls)
 putStatus
 
   IN : start time
+       status
        start epoch number
        end epoch number
        step size of status output
@@ -124,6 +134,7 @@ putStatus tm0 st getE i ls = do
   putStr (ite ++ acc)
   tm <- getCurrentTime
   putStrLn ("time = " ++ show (diffUTCTime tm tm0))
+  saveStatus st ls
   --mapM_ putOne rs   -- for debug
   where
     putOne :: ([Double], Double) -> IO ()

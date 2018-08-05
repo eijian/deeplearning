@@ -6,6 +6,9 @@ deep learning trial
 
 * git checkout -b _branch_name_
 * git push origin _branch_name_
+
+-development-
+
 * git checkout master
 * git merge _branch_name_
 * git push
