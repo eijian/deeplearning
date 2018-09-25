@@ -46,8 +46,8 @@ main = do
 
   let
     is = [1 .. (repeatCt st)]
-    getTeachers = getImages (poolT st) (batchSz st)
-    getTests    = getImages (poolE st) (ntest st)
+    getTeachers = getImages (poolT st) ((batchSz st) * (nclass st))
+    getTests    = getImages (poolE st) ((testSz st)  * (nclass st))
     putF = putStatus tm0 st getTests
     loopFunc = trainLoop' getTeachers putF (learnR st) (savePt st)
 

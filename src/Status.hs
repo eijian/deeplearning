@@ -8,13 +8,14 @@ module Status (
 , Status
 , layers
 , learnR
+, nclass
 , batchSz
+, testSz
 , ntrained
 , repeatCt
 , savePt
 , poolT
 , poolE
-, ntest
 ) where
 
 import Control.Exception
@@ -33,13 +34,14 @@ data Status = Status {
     dirname  :: String
   , layers   :: [Layer]
   , learnR   :: Double
+  , nclass   :: Int
   , batchSz  :: Int
+  , testSz   :: Int
   , ntrained :: Int
   , repeatCt :: Int
   , savePt   :: Int
   , poolT    :: MemPool
   , poolE    :: MemPool
-  , ntest    :: Int
   }
 
 --
@@ -116,14 +118,15 @@ staticStatus = do
         dirname  = ""
       , layers   = ls
       , learnR   = 0.1
-      , batchSz  = 150
+      , nclass   = 3
+      , batchSz  = 50
+      , testSz   = 10
       , ntrained = 0
 --      , repeatCt = 500
       , repeatCt = 100
       , savePt   = 5
       , poolT    = pt
       , poolE    = pe
-      , ntest    = m * k
       }
 
   return stat
@@ -133,7 +136,7 @@ loadFromFile dname = do
   let
     k = 3   -- number of class
     n = 50  -- number of teacher data for each class
-    m = 10  -- number of test 
+    m = 10  -- number of test
     train_N    = n * k
     test_N     = m * k
     image_size = [12, 12]
@@ -178,7 +181,9 @@ loadFromFile dname = do
         dirname  = dname
       , layers   = ls'
       , learnR   = 0.1
-      , batchSz  = 150
+      , nclass   = 3
+      , batchSz  = 50
+      , testSz   = 10
       , ntrained = 0
 --      , repeatCt = 500
       , repeatCt = 100
@@ -186,7 +191,6 @@ loadFromFile dname = do
       , savePt   = 10
       , poolT    = pt
       , poolE    = pe
-      , ntest    = m * k
       }
 
   return stat
@@ -230,5 +234,3 @@ writeFilter dir i layer = do
   case res of
     Left  _ -> putStrLn ("failed to write: " ++ fn)
     Right _ -> return ()
-
-

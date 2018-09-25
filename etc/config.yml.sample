@@ -1,0 +1,61 @@
+---
+# Config for Deep Learning
+image:
+  x: 12
+  y: 12
+  ch: 1
+training:
+  class: 3
+  lerningrate: 0.1
+  batchsize: 150
+  opstep: 5
+  testsize: 10
+layers:
+  convolution:
+    name: "conv 1"
+    imgx: 12
+    imgy: 12
+    ch_in: 1
+    kern: 3
+    pool: 2
+    ch_out: 10
+  activation:
+    name: "act 1"
+    func: "relu"
+  pooling:
+    name: "pool 1"
+    size: 2
+  convolution:
+    name: "conv 2"
+    imgx: 5
+    imgy: 5
+    ch_in: 10
+    kern: 2
+    pool: 2
+    ch_out: 20
+  activation:
+    name: "act 2"
+    func: "relu"
+  pooling:
+    name: "pool 2"
+    size: 2
+  flatten:
+    name: "flat"
+    imgx: 2
+    imgy: 2
+  fullconnected:
+    name: "full 1"
+    ch_in: 80
+    ch_in: 20
+    init: "rand"
+  activation:
+    name: "act 3"
+    func: "relu"
+  fullconnected:
+    name: "full 2"
+    ch_in: 20
+    ch_in: 3
+    init: "zero"
+  activation:
+    name: "act 4"
+    func: "softmax"

@@ -1,0 +1,43 @@
+EBNF for "train" (revision 0)
+
+  config = line , { line } ;
+  line   = space , param , linefeed ;
+
+
+
+  datadir     = 'datadir:' , pstring ;
+  img_x       = 'img_x:' , pnatural ;
+  img_y       = 'img_y:' , pnatural ;
+  ch_in       = 'ch_in:' , pnatural ;
+  ch_out      = 'ch_out:' , pnatural ;
+  class       = 'class:' , pnatural ;
+  lerningrate = 'learningrate:' , pfloat ;
+  batchsize   = 'batchsize:' , pnatural ;
+  testsize    = 'testsize:' , pnatural ;
+  opstep      = 'opstep:' , pnatural ;
+  name        = 'name:' , pstring ;
+  kern        = 'kern:', pnatural ;
+  pool        = 'pool:', pnatural ;
+  func        = 'func:', ( relu | softmax ) ;
+  size        = 'size:' , pnatural ;
+  init        = 'init:', ( zero | rand ) ;
+
+  relu      = space , 'relu' , eol ;
+  softmax   = space , 'softmax' , eol ;
+  zero      = space , 'zero' , eol ;
+  rand      = space , 'rand' , eol ;
+
+  pstring   = space , string , { string } , eol ;
+  pfloat    = space , float , eol ;
+  pnatural  = space , natural , eol ;
+
+  string = "a-z,A-Z,0-9/" ;
+  float      = ( natural | "0" ) , "." , { intnum } ;
+  natural    = naturalnum , { intnum } ;
+  naturalnum = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+  intnum     = "0" | naturalnum ;
+
+  eol        = space , linefeed ;
+  space      = { white_space } ;
+  white_space = '\x20' | '\x09' ;
+  linefeed    = '\x0a' | ( '\x0d' , '\x0a' ) ;
