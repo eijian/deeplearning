@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                deeplearning
-version:             0.6.0.0
+version:             0.7.0.0
 synopsis:            Deep learning Trial
 -- description:
 homepage:            https://github.com/eijian/deeplearning
@@ -37,6 +37,8 @@ executable train
                      , time
                      , deepseq
                      , hmatrix
+                     , directory >= 1.2.2.0
+                     , strict-io
   hs-source-dirs:      src
                      , .
   -- ghc-options:         -rtsopts -prof -auto-all -caf-all

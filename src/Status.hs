@@ -40,8 +40,8 @@ data Status = Status {
   , ntrained :: Int
   , repeatCt :: Int
   , savePt   :: Int
-  , poolT    :: MemPool
-  , poolE    :: MemPool
+  , poolT    :: Pool
+  , poolE    :: Pool
   }
 
 --
@@ -113,10 +113,16 @@ staticStatus = do
       , FullConnLayer ff2
       , ActLayer softmax
       ]
+    dname = "/Users/eiji/tmp/dltest/sam1"
+    dir = dname ++ filterDir
 
+  fs <- forM [0..(length ls - 1)] $ \i -> readFilter dir i
+
+  let
+    ls' = zipWith readLayer ls fs
     stat = Status {
-        dirname  = ""
-      , layers   = ls
+        dirname  = dname
+      , layers   = ls'
       , learnR   = 0.1
       , nclass   = 3
       , batchSz  = 50
@@ -124,7 +130,7 @@ staticStatus = do
       , ntrained = 0
 --      , repeatCt = 500
       , repeatCt = 100
-      , savePt   = 5
+      , savePt   = 10
       , poolT    = pt
       , poolE    = pe
       }
@@ -148,8 +154,10 @@ loadFromFile dname = do
     n_hidden     = 20
     n_out = k
 
-  pt <- initSamplePool 1 (12, 12) 3 0.95 (train_N * 10)
-  pe <- initSamplePool 1 (12, 12) 3 0.90 (test_N * 10)
+--  pt <- initSamplePool 1 (12, 12) 3 0.95 (train_N * 10)
+--  pe <- initSamplePool 1 (12, 12) 3 0.90 (test_N * 10)
+  pt <- initFilePool (dname ++ "/teachers") k
+  pe <- initFilePool (dname ++ "/tests")    k
 
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
@@ -232,5 +240,5 @@ writeFilter dir i layer = do
   let fn = dir ++ show i ++ filterExt
   res <- try $ writeFile fn $ showFilter layer :: IO (Either SomeException ())
   case res of
-    Left  _ -> putStrLn ("failed to write: " ++ fn)
+    Left  e -> putStrLn ("failed to write: " ++ fn ++ ": " ++ (show e))
     Right _ -> return ()

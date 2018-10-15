@@ -42,6 +42,7 @@ main = do
     else error usage
   putStrLn "Initializing..."
   st <- loadStatus dn
+--  st <- loadStatus ""
   tm0 <- getCurrentTime
 
   let

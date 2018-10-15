@@ -17,9 +17,9 @@ layers:
     imgx: 12
     imgy: 12
     ch_in: 1
+    ch_out: 10
     kern: 3
     pool: 2
-    ch_out: 10
   activation:
     name: "act 1"
     func: "relu"
@@ -31,9 +31,9 @@ layers:
     imgx: 5
     imgy: 5
     ch_in: 10
+    ch_out: 20
     kern: 2
     pool: 2
-    ch_out: 20
   activation:
     name: "act 2"
     func: "relu"
@@ -47,7 +47,7 @@ layers:
   fullconnected:
     name: "full 1"
     ch_in: 80
-    ch_in: 20
+    ch_out: 20
     init: "rand"
   activation:
     name: "act 3"
@@ -55,7 +55,7 @@ layers:
   fullconnected:
     name: "full 2"
     ch_in: 20
-    ch_in: 3
+    ch_out: 3
     init: "zero"
   activation:
     name: "act 4"
