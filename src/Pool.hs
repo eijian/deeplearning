@@ -37,7 +37,7 @@ class PoolClass p where
   nSample :: p -> Int
   nClass :: p -> Int
 
-type ImageFile = (Class, String)
+type ImageFile = (Int, String)
 data Pool =
   MemPool {
     m :: Map.Map Int Trainer
@@ -46,6 +46,7 @@ data Pool =
   FilePool {
     imageFiles :: [[ImageFile]]
   , numclass :: Int
+  , classvec :: [Class]
   }
 
 instance PoolClass Pool where
@@ -59,13 +60,13 @@ instance PoolClass Pool where
       im0 = mapMaybe (`Map.lookup` m) [o..mx1]
       im1 = mapMaybe (`Map.lookup` m) [0..mx2]
     return (im0 ++ im1)
-  getImages (FilePool flist nc) bt ofs = do
+  getImages (FilePool flist nc cv) bt ofs = do
     let flist' = selectPerClass flist bt ofs
     ts <- forM flist' $ \(c, fn) -> do
       res <- try $ (SIO.run $ SIO.readFile fn) :: IO (Either SomeException String)
       return $ case res of
         Left  e -> error ("read error:" ++ (show e))
-        Right s -> Just (read s :: Image, c)
+        Right s -> Just (read s :: Image, cv !! c)
     let trainers = catMaybes ts
     -- putStrLn ("FLIST:" ++ (show $ length trainers))
     return trainers
@@ -76,7 +77,7 @@ instance PoolClass Pool where
       s = nSample p
       ofs = floor (r * (fromIntegral s))
     getImages p bt ofs
-  getImagesRandomly p@(FilePool flist nc) bt= do
+  getImagesRandomly p@(FilePool flist nc _) bt= do
     r <- MT.randomIO :: IO Double
     let
       s = nSample p `div` nc
@@ -84,14 +85,14 @@ instance PoolClass Pool where
     getImages p bt ofs
 
   nSample (MemPool m _) = Map.size m
-  nSample (FilePool flist _) = count flist
+  nSample (FilePool flist _ _) = count flist
     where
       count :: [[ImageFile]] -> Int
       count [] = 0
       count (x:xs) = length x + count xs
 
   nClass (MemPool _ c)  = c
-  nClass (FilePool _ c) = c
+  nClass (FilePool _ c _) = c
 
 ---- IMAGE POOL ON MEMORY ----
 ------------------------------
@@ -143,16 +144,17 @@ initSamplePool c (sx, sy) o p n = do
 
 initFilePool :: String -> Int -> IO Pool
 initFilePool path nc = do
+  let classv = map (classNumToVec nc) [0..(nc-1)]
   flist <- forM [0..(nc-1)] $ \i -> do
+    let dir = path ++ "/" ++ (show i) ++ "/"
     --files <- listDirectory dir
     files <- getDirectoryContents dir
-    let files' = map (makeImageFile i) $ filter (isSuffixOf ".dat") files
+    let files' = map (makeImageFile i dir) $ filter (isSuffixOf ".dat") files
     return files'
-  return (FilePool flist nc)
+  return (FilePool flist nc classv)
   where
-    dir = path ++ "/" ++ (show i) ++ "/"
-    makeImageFile :: Int -> String -> ImageFile
-    makeImageFile i fn = (classNumToVec nc i, dir ++ fn)
+    makeImageFile :: Int -> String -> String -> ImageFile
+    makeImageFile i dir fn = (i, dir ++ fn)
 
 --
 -- PRIVATE FUNCTIONS
