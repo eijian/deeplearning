@@ -1,48 +1,47 @@
 ---
 # Config for Deep Learning
 training:
+  image: [ 12, 12 ]
+  ch_in: 1
   class: 3
   lerningrate: 0.1
   # batchsize and testsize are the number of teacher sample per class
   batchsize: 50
   testsize: 10
   outputpstep: 5
-image:
-  reso: [ 12, 12 ]
-  ch: 1
 layers:
-  convolution:
+  - type: convolution:
     reso: [ 12, 12 ]
     ch_in: 1
     ch_out: 10
     kern: 3
     pool: 2
-  activation:
+  - type: activation:
     func: "relu"
-  pooling:
+  - type: pooling:
     size: 2
-  convolution:
+  - type: convolution:
     reso: [ 5, 5 ]
     ch_in: 10
     ch_out: 20
     kern: 2
     pool: 2
-  activation:
+  - type: activation:
     func: "relu"
-  pooling:
+  - type: pooling:
     size: 2
-  flatten:
+  - type: flatten:
     imgx: 2
     imgy: 2
-  fullconnected:
+  - type: fullconnected:
     ch_in: 80
     ch_out: 20
     init: "rand"
-  activation:
+  - type: activation:
     func: "relu"
-  fullconnected:
+  - type: fullconnected:
     ch_in: 20
     ch_out: 3
     init: "zero"
-  activation:
+  - type: activation:
     func: "softmax"
