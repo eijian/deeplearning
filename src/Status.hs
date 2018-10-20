@@ -147,54 +147,9 @@ loadFromFile dname = do
   ln <- readConfig (dname ++ "/" ++ confFilename)
   (((xr, yr), ch, cl, lr, bs, ts, rp, sp), ls0) <- parseConfig ((intercalate "\n" ln) ++ "\n")
   ls <- makeLayer ls0
-
-  let
---    k = 3   -- number of class
---    n = 50  -- number of teacher data for each class
---    m = 10  -- number of test
-    train_N    = bs * cl
-    test_N     = ts * cl
-    image_size = [xr, yr]
-    channel    = ch
-
-    n_kernels    = [10, 20]
-    kernel_sizes = [3, 2]
-    pool_sizes   = [2, 2]
-    n_hidden     = 20
-    n_out = cl
-
---  pt <- initSamplePool 1 (12, 12) 3 0.95 (train_N * 10)
---  pe <- initSamplePool 1 (12, 12) 3 0.90 (test_N * 10)
   pt <- initFilePool (dname ++ "/teachers") cl
   pe <- initFilePool (dname ++ "/tests")    cl
-
-{-
-  fc1 <- initFilterC 10 1 12 12 3 2
-  fc2 <- initFilterC 20 10 5 5 2 2
-  ff1 <- initFilterF n_hidden (2*2*20)
-  --ff2 <- initFilterF n_out n_hidden
-  ff2 <- zeroFilterF n_out n_hidden
-
-  let
-    ls = [
-        ConvLayer 3 fc1
-      , ActLayer relu
-      , MaxPoolLayer 2
-      , ConvLayer 2 fc2
-      , ActLayer relu
-      , MaxPoolLayer 2
-      , FlattenLayer 2 2
-      , FullConnLayer ff1
-      , ActLayer relu
-      , FullConnLayer ff2
-      , ActLayer softmax
-      ]
--}
-
-  let
-    dir = dname ++ filterDir
-
-  fs <- forM [0..(length ls - 1)] $ \i -> readFilter dir i
+  fs <- forM [0..(length ls - 1)] $ \i -> readFilter (dname ++ filterDir) i
 
   let
     ls' = zipWith readLayer ls fs
