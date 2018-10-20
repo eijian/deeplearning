@@ -27,6 +27,7 @@ executable train
                      , CNN.Layer
                      , CNN.LayerType
                      , CNN.PoolLayer
+                     , Parser
                      , Pool
                      , Status
                      , Trainer
@@ -39,6 +40,8 @@ executable train
                      , hmatrix
                      , directory >= 1.2.2.0
                      , strict-io
+                     , parsec
+                     , parsec-numbers
   hs-source-dirs:      src
                      , .
   -- ghc-options:         -rtsopts -prof -auto-all -caf-all

@@ -11,6 +11,7 @@ module CNN.LayerType (
 , Delta
 , Layer ( NopLayer, ActLayer, MaxPoolLayer, ConvLayer, FullConnLayer
         , FlattenLayer)
+, LayerB
 ) where
 
 import Numeric.LinearAlgebra.Data
@@ -31,6 +32,9 @@ type FilterF = Matrix R
 -- for backward propergation
 --type Delta = [Double]
 type Delta = Image
+
+-- LayerB is for converting from parsed data to Layer
+type LayerB = (String, [Int])
 
 data Layer =
     NopLayer

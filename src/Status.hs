@@ -20,6 +20,7 @@ module Status (
 
 import Control.Exception
 import Control.Monad
+import Data.List
 
 import CNN.ActLayer
 import CNN.ConvLayer
@@ -28,6 +29,7 @@ import CNN.Layer
 import CNN.LayerType
 import CNN.PoolLayer
 
+import Parser
 import Pool
 
 data Status = Status {
@@ -53,6 +55,9 @@ filterDir = "/filters/"
 
 filterExt :: String
 filterExt = ".filter"
+
+confFilename :: String
+confFilename = "config.yml"
 
 --
 -- FUNCTIONS
@@ -139,26 +144,31 @@ staticStatus = do
 
 loadFromFile :: String -> IO Status
 loadFromFile dname = do
+  ln <- readConfig (dname ++ "/" ++ confFilename)
+  (((xr, yr), ch, cl, lr, bs, ts, rp, sp), ls0) <- parseConfig ((intercalate "\n" ln) ++ "\n")
+  ls <- makeLayer ls0
+
   let
-    k = 3   -- number of class
-    n = 50  -- number of teacher data for each class
-    m = 10  -- number of test
-    train_N    = n * k
-    test_N     = m * k
-    image_size = [12, 12]
-    channel    = 1
+--    k = 3   -- number of class
+--    n = 50  -- number of teacher data for each class
+--    m = 10  -- number of test
+    train_N    = bs * cl
+    test_N     = ts * cl
+    image_size = [xr, yr]
+    channel    = ch
 
     n_kernels    = [10, 20]
     kernel_sizes = [3, 2]
     pool_sizes   = [2, 2]
     n_hidden     = 20
-    n_out = k
+    n_out = cl
 
 --  pt <- initSamplePool 1 (12, 12) 3 0.95 (train_N * 10)
 --  pe <- initSamplePool 1 (12, 12) 3 0.90 (test_N * 10)
-  pt <- initFilePool (dname ++ "/teachers") k
-  pe <- initFilePool (dname ++ "/tests")    k
+  pt <- initFilePool (dname ++ "/teachers") cl
+  pe <- initFilePool (dname ++ "/tests")    cl
 
+{-
   fc1 <- initFilterC 10 1 12 12 3 2
   fc2 <- initFilterC 20 10 5 5 2 2
   ff1 <- initFilterF n_hidden (2*2*20)
@@ -179,6 +189,9 @@ loadFromFile dname = do
       , FullConnLayer ff2
       , ActLayer softmax
       ]
+-}
+
+  let
     dir = dname ++ filterDir
 
   fs <- forM [0..(length ls - 1)] $ \i -> readFilter dir i
@@ -188,21 +201,42 @@ loadFromFile dname = do
     stat = Status {
         dirname  = dname
       , layers   = ls'
-      , learnR   = 0.1
-      , nclass   = 3
-      , batchSz  = 50
-      , testSz   = 10
+      , learnR   = lr
+      , nclass   = cl
+      , batchSz  = bs
+      , testSz   = ts
       , ntrained = 0
---      , repeatCt = 500
-      , repeatCt = 100
---      , savePt   = 5
-      , savePt   = 10
+      , repeatCt = rp
+      , savePt   = sp
       , poolT    = pt
       , poolE    = pe
       }
 
   return stat
 
+--
+-- PRIVATE
+--
+
+readConfig :: String -> IO [String]
+readConfig file = do
+  f <- readFile file
+  return $ map removeComment $ lines f
+
+parseConfig :: String -> IO (Config, [LayerB])
+parseConfig conf = do
+  let
+    (cf, ls) = case (parse config "training config file parse error" conf) of
+      Left e  -> error ("ERROR: " ++ show e)
+      Right (c', ls') -> (c', ls')
+  return (cf, ls)
+
+makeLayer :: [LayerB] -> IO [Layer]
+makeLayer [] = return []
+makeLayer (l:ls) = do
+  l' <- convertLayerB l
+  ls' <- makeLayer ls
+  return (l':ls')
 
 {-
 saveStatus

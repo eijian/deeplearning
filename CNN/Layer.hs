@@ -9,6 +9,7 @@ module CNN.Layer (
 , reverseLayer
 , showFilter
 , updateLayer
+, convertLayerB
 ) where
 
 import Debug.Trace
@@ -72,4 +73,28 @@ readLayer l@(FullConnLayer _) f =
   if f /= "" then FullConnLayer (read f :: FilterF)
              else l
 readLayer l _                   = l
+
+{- |
+
+-}
+
+convertLayerB :: LayerB -> IO Layer
+convertLayerB (ln, para) = do
+  case ln of
+    "convolution"   -> do
+      -- initFilterC co ci x y kn pl
+      fc <- initFilterC (para!!3) (para!!2) (para!!0) (para!!1) (para!!4) (para!!5)
+      return $ ConvLayer (para!!4) fc
+    "activation"    -> return $ ActLayer $ numToFunc (para!!0)
+    "pooling"       -> return $ MaxPoolLayer (para!!0)
+    "flatten"       -> return $ FlattenLayer (para!!0) (para!!1)
+    "fullconnected" -> do
+      fc <- if para!!2 == 0
+        then zeroFilterF (para!!1) (para!!0)
+        else initFilterF (para!!1) (para!!0)
+      return $ FullConnLayer fc
+    _               -> error ("no such layer name: " ++ ln)
+
+
+
 

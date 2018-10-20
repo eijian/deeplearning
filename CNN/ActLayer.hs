@@ -4,10 +4,14 @@
 
 module CNN.ActLayer (
   relu
+, relu'
+, step
 , softmax
 , activate
 , deactivate
 , reverseActFunc
+, funcToNum
+, numToFunc
 ) where
 
 import Numeric.LinearAlgebra hiding (step)
@@ -138,4 +142,27 @@ deactivate f im delta
 
 reverseActFunc :: ActFunc -> Layer
 reverseActFunc relu = ActLayer step
+
+{- |
+>>> funcToNum step
+0
+>>> funcToNum relu
+1
+-}
+
+funcToNum :: ActFunc -> Int
+funcToNum f = case f of
+  step    -> 0
+  relu    -> 1
+  relu'   -> 2
+  softmax -> 3
+  _       -> error ("invalid function")
+
+numToFunc :: Int -> ActFunc
+numToFunc i = case i of
+  0 -> step
+  1 -> relu
+  2 -> relu'
+  3 -> softmax
+  _ -> error ("invalid function number: " ++ (show i))
 
