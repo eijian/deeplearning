@@ -18,6 +18,7 @@ import           Control.Monad
 import           Data.List
 import qualified Data.Map               as Map
 import           Data.Maybe
+import           Debug.Trace
 import           Numeric.LinearAlgebra
 import           System.Directory
 import qualified System.IO.Strict       as SIO
@@ -168,7 +169,7 @@ selectPerClass (x:xs) bt ofs = fl ++ (selectPerClass xs bt ofs)
     ofs' = ofs `mod` len
     ed = ofs' + bt - 1
     ed' = if ed > len then (ed - len) `mod` len else ed
-    range = if ed' > ofs'
-      then [0..(len - 1)]
+    range = if ed' >= ofs'
+      then [ofs' .. ed']
       else [0..ed'] ++ [ofs'..(len - 1)]
     fl = map (x !!) range

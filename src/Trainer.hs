@@ -10,6 +10,7 @@ module Trainer (
 ) where
 
 import Control.Monad
+import Data.List (foldl')
 import Debug.Trace
 import Numeric.LinearAlgebra
 
@@ -64,12 +65,21 @@ evaluate
 
 -}
 
+{- 過去の実装
 evaluate :: [Layer] -> [Trainer] -> [(Vector R, Double)]
 evaluate _ [] = []
 evaluate ls (s:ss) = (op, rt) : evaluate ls ss
   where
     op = flatten $ head (head $ forwardProp ls [fst s])
     rt = (snd s) <.> op
+-}
+
+evaluate :: [Layer] -> Double -> Trainer -> Double
+evaluate ls rr (i, c) = rr + c <.> op
+  where
+    -- op = flatten $ head (head $ forwardProp ls [i])
+    is = foldl' forwardProp' [i] ls
+    op = flatten $ head (head is)
 
 ---
 
@@ -86,6 +96,9 @@ fowardProp
 forwardProp :: [Layer] -> [Image] -> [Image]
 forwardProp [] is = is
 forwardProp (l:ls) (i:is) = forwardProp ls (forwardLayer l i ++ is)
+
+forwardProp' :: [Image] -> Layer -> [Image]
+forwardProp' (i:is) l = forwardLayer l i ++ is
 
 {- |
 backwardProp
