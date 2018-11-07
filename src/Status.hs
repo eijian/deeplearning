@@ -202,8 +202,8 @@ saveStatus
 
 -}
 
-saveStatus :: Status -> [Layer] -> IO ()
-saveStatus st ls = do
+saveStatus :: Status -> [Layer] -> Int -> IO ()
+saveStatus st ls i = do
   --putStrLn ("saved to '" ++ (dirname st) ++ "'")
   let
     dir = (dirname st) ++ filterDir
