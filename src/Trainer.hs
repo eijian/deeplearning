@@ -34,7 +34,8 @@ train :: [Layer] -> [Layer] -> Trainer -> [Maybe Layer]
 train [] _ (i, c) = []
 train ls rls (i, c) = dls
   where
-    (y, op') = splitAt 1 $ forwardProp ls [i]
+--    (y, op') = splitAt 1 $ forwardProp ls [i]
+    (y, op') = splitAt 1 $ foldl' forwardProp' [i] ls
     d = [reshape (size c) ((flatten $ head $ head y) `vsub` c)]
     (_, dls) = backwardProp (zip (tail op') rls) (d, [])
 

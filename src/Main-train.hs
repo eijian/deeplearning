@@ -58,7 +58,7 @@ main = do
   layers' <- foldM' loopFunc (layers st) is
 
   putStrLn "Saving status..."
-  saveStatus st layers'
+  saveStatus st layers' (repeatCt st * batchSz st)
   putStrLn "Finished!"
 
 --
@@ -95,7 +95,7 @@ trainLoop
 trainLoop' :: (Int -> IO [Trainer]) -> (Int -> [Layer] -> IO ()) -> Status
            -> [Layer] -> Int -> IO [Layer]
 trainLoop' getT putF st ls i = do
-  teachers <- getT (i-1 * batchSz st)
+  teachers <- getT ((i-1) * batchSz st)
   let ls' = updateLayers (learnR st) teachers ls
   if i `mod` (savePt st) == 0
     then putF i ls'
@@ -128,7 +128,7 @@ putStatus
 
 putStatus :: UTCTime -> Status -> (Int -> IO [Trainer]) -> Int -> [Layer] -> IO ()
 putStatus tm0 st getE i ls = do
-  tests <- getE (i-1 * testSz st)
+  tests <- getE ((i-1) * testSz st)
   let
     --(rv, rr) = unzip $ evaluate ls tests
     rr = foldl' (evaluate ls) 0.0 tests
@@ -138,7 +138,7 @@ putStatus tm0 st getE i ls = do
   putStr (ite ++ acc)
   tm <- getCurrentTime
   putStrLn ("time = " ++ show (diffUTCTime tm tm0))
-  saveStatus st ls
+  saveStatus st ls (batchSz st * i)
   --mapM_ putOne rs   -- for debug
   where
     putOne :: ([Double], Double) -> IO ()
