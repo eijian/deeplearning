@@ -6,6 +6,7 @@ module Trainer (
   train
 , update
 , evaluate
+, judge
 , forwardProp
 ) where
 
@@ -34,9 +35,8 @@ train :: [Layer] -> [Layer] -> Trainer -> [Maybe Layer]
 train [] _ (i, c) = []
 train ls rls (i, c) = dls
   where
---    (y, op') = splitAt 1 $ forwardProp ls [i]
-    (y, op') = splitAt 1 $ foldl' forwardProp' [i] ls
-    d = [reshape (size c) ((flatten $ head $ head y) `vsub` c)]
+    (y, op') = judge ls i
+    d = [reshape (size c) (y `vsub` c)]
     (_, dls) = backwardProp (zip (tail op') rls) (d, [])
 
 {-
@@ -76,11 +76,14 @@ evaluate ls (s:ss) = (op, rt) : evaluate ls ss
 -}
 
 evaluate :: [Layer] -> Double -> Trainer -> Double
-evaluate ls rr (i, c) = rr + c <.> op
+evaluate ls rr (i, c) = rr + c <.> y
   where
-    -- op = flatten $ head (head $ forwardProp ls [i])
-    is = foldl' forwardProp' [i] ls
-    op = flatten $ head (head is)
+    (y, op) = judge ls i
+
+judge :: [Layer] -> Image -> (Vector R, [Image])
+judge ls im = (flatten $ head $ head y, op)
+  where
+    (y, op) = splitAt 1 $ foldl' forwardProp' [im] ls
 
 ---
 
