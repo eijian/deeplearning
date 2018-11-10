@@ -25,10 +25,10 @@ import CNN.Image
 import CNN.Layer
 import CNN.LayerType
 import CNN.PoolLayer
+import CNN.Propagation
 
 import Pool
 import Status
-import Trainer
 
 usage :: String
 usage = "Usage: train <dir>"

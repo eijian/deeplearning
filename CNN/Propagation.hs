@@ -1,8 +1,8 @@
 --
--- Trainer : train supervised dataset
+-- Propagation : train supervised dataset and judge images
 --
 
-module Trainer (
+module CNN.Propagation (
   train
 , update
 , evaluate

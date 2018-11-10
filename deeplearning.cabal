@@ -27,10 +27,10 @@ executable train
                      , CNN.Layer
                      , CNN.LayerType
                      , CNN.PoolLayer
+                     , CNN.Propagation
                      , Parser
                      , Pool
                      , Status
-                     , Trainer
   -- other-extensions:
   build-depends:       base >=4.8 && <5.0
                      , mersenne-random >= 1.0
