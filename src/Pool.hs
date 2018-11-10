@@ -11,6 +11,7 @@ module Pool (
 , nClass
 , initSamplePool
 , initFilePool
+, loadImage
 ) where
 
 import           Control.Exception
@@ -34,7 +35,7 @@ class PoolClass p where
          offset
   -}
   getImages :: p -> Int -> Int -> IO [Trainer]
-  getImagesRandomly :: p -> Int -> IO [Trainer]
+  getImagesRandomly :: p -> Int -> Int -> IO [Trainer]
   nSample :: p -> Int
   nClass :: p -> Int
 
@@ -64,23 +65,22 @@ instance PoolClass Pool where
   getImages (FilePool flist nc cv) bt ofs = do
     let flist' = selectPerClass flist bt ofs
     ts <- forM flist' $ \(c, fn) -> do
-      res <- try $ (SIO.run $ SIO.readFile fn) :: IO (Either SomeException String)
-      return $ case res of
-        Left  e -> error ("read error:" ++ (show e))
-        Right s -> Just (read s :: Image, cv !! c)
+      im <- loadImage fn
+      return $ Just (im, cv !! c)
     let trainers = catMaybes ts
-    -- putStrLn ("FLIST:" ++ (show $ length trainers))
     return trainers
 
-  getImagesRandomly p@(MemPool m _) bt = do
-    r <- MT.randomIO :: IO Double
+  getImagesRandomly p@(MemPool m _) bt s = do
+    r0 <- MT.randomIO :: IO Double
     let
+      r = if r0 == 1.0 then 0.0 else r0
       s = nSample p
       ofs = floor (r * (fromIntegral s))
     getImages p bt ofs
-  getImagesRandomly p@(FilePool flist nc _) bt= do
-    r <- MT.randomIO :: IO Double
+  getImagesRandomly p@(FilePool flist nc _) bt s = do
+    r0 <- MT.randomIO :: IO Double
     let
+      r = if r0 == 1.0 then 0.0 else r0
       s = nSample p `div` nc
       ofs = floor (r * (fromIntegral s))
     getImages p bt ofs
@@ -156,6 +156,13 @@ initFilePool path nc = do
   where
     makeImageFile :: Int -> String -> String -> ImageFile
     makeImageFile i dir fn = (i, dir ++ fn)
+
+loadImage :: String -> IO Image
+loadImage fn = do
+  res <- try $ (SIO.run $ SIO.readFile fn) :: IO (Either SomeException String)
+  return $ case res of
+    Left  e -> error ("read error:" ++ (show e))
+    Right s -> read s :: Image
 
 --
 -- PRIVATE FUNCTIONS

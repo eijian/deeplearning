@@ -3,10 +3,10 @@
 --
 
 module CNN.Propagation (
-  train
+  trainLayers
 , update
-, evaluate
-, judge
+, evaluateLayers
+, judgeImage
 , forwardProp
 ) where
 
@@ -21,7 +21,7 @@ import CNN.Layer
 import CNN.LayerType
 
 {-
-train
+trainLayers
 
   IN : layers
        reversed layers (for backward prop)
@@ -31,11 +31,11 @@ train
 
 -}
 
-train :: [Layer] -> [Layer] -> Trainer -> [Maybe Layer]
-train [] _ (i, c) = []
-train ls rls (i, c) = dls
+trainLayers :: [Layer] -> [Layer] -> Trainer -> [Maybe Layer]
+trainLayers [] _ (i, c) = []
+trainLayers ls rls (i, c) = dls
   where
-    (y, op') = judge ls i
+    (y, op') = judgeImage ls i
     d = [reshape (size c) (y `vsub` c)]
     (_, dls) = backwardProp (zip (tail op') rls) (d, [])
 
@@ -56,7 +56,7 @@ update lr ls [] = ls
 update lr (l:ls) (dl:dls) = updateLayer lr l dl : update lr ls dls
 
 {-
-evaluate
+evaluateLayers
 
   IN : layers
        trainer data
@@ -75,13 +75,13 @@ evaluate ls (s:ss) = (op, rt) : evaluate ls ss
     rt = (snd s) <.> op
 -}
 
-evaluate :: [Layer] -> Double -> Trainer -> Double
-evaluate ls rr (i, c) = rr + c <.> y
+evaluateLayers :: [Layer] -> Double -> Trainer -> Double
+evaluateLayers ls rr (i, c) = rr + c <.> y
   where
-    (y, op) = judge ls i
+    (y, op) = judgeImage ls i
 
-judge :: [Layer] -> Image -> (Vector R, [Image])
-judge ls im = (flatten $ head $ head y, op)
+judgeImage :: [Layer] -> Image -> (Vector R, [Image])
+judgeImage ls im = (flatten $ head $ head y, op)
   where
     (y, op) = splitAt 1 $ foldl' forwardProp' [im] ls
 

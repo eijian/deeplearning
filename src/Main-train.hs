@@ -13,6 +13,7 @@ import Control.Monad
 import Data.Time
 import Data.List (foldl')
 import Debug.Trace
+import Numeric.LinearAlgebra
 import System.Environment
 import System.IO
 import Text.Printf
@@ -31,35 +32,53 @@ import Pool
 import Status
 
 usage :: String
-usage = "Usage: train <dir>"
+usage = "Usage: train <dir> [<image>]"
 
 -- MAIN
 
 main :: IO ()
 main = do
   as <- getArgs
-  dn <- if length as == 1
-    then return (as !! 0)
-    else error usage
+  case length as of
+    1 -> train (as !! 0)
+    2 -> judge (as !! 0) (as !! 1)
+    _ -> error usage
+
+train :: String -> IO ()
+train dn = do
   putStrLn "Initializing..."
   st <- loadStatus dn
 --  st <- loadStatus ""
   tm0 <- getCurrentTime
 
   let
-    is = [1 .. (repeatCt st)]
-    tbatch = batchSz st * nclass st
-    getTeachers = getImages (poolT st) (batchSz st)
-    getTests    = getImages (poolE st) (testSz st)
+    --getTeachers = getImages (poolT st) (batchSz st)
+    --getTests    = getImages (poolE st) (testSz st)
+    getTeachers = getImagesRandomly (poolT st) (batchSz st)
+    getTests    = getImagesRandomly (poolE st) (testSz st)
     putF = putStatus tm0 st getTests
     loopFunc = trainLoop' getTeachers putF st
-  putStrLn ("Training the model... (#batch:" ++ (show tbatch) ++ ")")
+  putStrLn ("Training the model... (#batch:" ++ (show (batchSz st * nclass st)) ++ ")")
   putF 0 (layers st)
-  layers' <- foldM' loopFunc (layers st) is
+  layers' <- foldM' loopFunc (layers st) [1 .. (repeatCt st)]
 
   putStrLn "Saving status..."
   saveStatus st layers' (repeatCt st * batchSz st)
   putStrLn "Finished!"
+
+judge :: String -> String -> IO ()
+judge dn imf = do
+  st <- loadStatus dn
+  fh <- openFile imf ReadMode
+  lst <- hGetContents fh
+  forM_ (lines lst) $ \i -> do
+    im <- loadImage i
+    putStr (i ++ ",")
+    let (y, _) = judgeImage (layers st) im
+    forM_ (zip [0..] (toList y)) $ \(c, v) -> do
+      let res = show c ++ (printf ":%.2f," (v*100))
+      putStr res
+    putStrLn ""
 
 --
 -- FUNCTIONS
@@ -95,7 +114,8 @@ trainLoop
 trainLoop' :: (Int -> IO [Trainer]) -> (Int -> [Layer] -> IO ()) -> Status
            -> [Layer] -> Int -> IO [Layer]
 trainLoop' getT putF st ls i = do
-  teachers <- getT ((i-1) * batchSz st)
+  --teachers <- getT ((i-1) * batchSz st)
+  teachers <- getT 0
   let ls' = updateLayers (learnR st) teachers ls
   if i `mod` (savePt st) == 0
     then putF i ls'
@@ -110,7 +130,7 @@ updateLayers :: Double -> [Trainer] -> [Layer] -> [Layer]
 updateLayers lr ts ls = update lr ls (transpose dls)
   where
     rls = tail $ map reverseLayer $ reverse ls    -- fist element isn't used
-    dls = map (train ls rls) ts             -- dls = diff of layers
+    dls = map (trainLayers ls rls) ts             -- dls = diff of layers
 
 {-
 putStatus
@@ -128,10 +148,11 @@ putStatus
 
 putStatus :: UTCTime -> Status -> (Int -> IO [Trainer]) -> Int -> [Layer] -> IO ()
 putStatus tm0 st getE i ls = do
-  tests <- getE ((i-1) * testSz st)
+  --tests <- getE ((i-1) * testSz st)
+  tests <- getE 0
   let
     --(rv, rr) = unzip $ evaluate ls tests
-    rr = foldl' (evaluate ls) 0.0 tests
+    rr = foldl' (evaluateLayers ls) 0.0 tests
   let
     ite = printf "iter = %5d/%d " i (repeatCt st)
     acc = printf "accuracy = %.10f " (rr / fromIntegral (length tests))
