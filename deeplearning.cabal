@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                deeplearning
-version:             0.9.0.0
+version:             0.10.0.0
 synopsis:            Deep learning Trial
 -- description:
 homepage:            https://github.com/eijian/deeplearning

@@ -5,7 +5,7 @@ deep learning trial
 ### make/merge a branch
 
 * git checkout -b _branch_name_
-* git push origin _branch_name_
+* git push --set-upstream origin _branch_name_
 
 -development-
 

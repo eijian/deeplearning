@@ -146,9 +146,11 @@ loadFromFile :: String -> IO Status
 loadFromFile dname = do
   ln <- readConfig (dname ++ "/" ++ confFilename)
   (((xr, yr), ch, cl, lr, bs, ts, rp, sp), ls0) <- parseConfig ((intercalate "\n" ln) ++ "\n")
+  --let ext = if ch == 1 then fileExtGray else fileExtColor
+  let ext = fileExtDat
   ls <- makeLayer ls0
-  pt <- initFilePool (dname ++ "/teachers") cl
-  pe <- initFilePool (dname ++ "/tests")    cl
+  pt <- initFilePool (dname ++ "/teachers") ext cl
+  pe <- initFilePool (dname ++ "/tests")    ext cl
   fs <- forM [0..(length ls - 1)] $ \i -> readFilter (dname ++ filterDir) i
 
   let

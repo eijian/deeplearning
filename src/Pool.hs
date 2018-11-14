@@ -11,12 +11,16 @@ module Pool (
 , nClass
 , initSamplePool
 , initFilePool
+, fileExtDat
+, fileExtGray
+, fileExtColor
 , loadImage
 ) where
 
 import           Control.Exception
 import           Control.Monad
 import           Data.List
+import qualified Data.ByteString        as B
 import qualified Data.Map               as Map
 import           Data.Maybe
 import           Debug.Trace
@@ -26,6 +30,21 @@ import qualified System.IO.Strict       as SIO
 import qualified System.Random.Mersenne as MT
 
 import CNN.Image
+
+--
+-- CONSTANTS
+--
+
+fileExtDat   = ".dat" :: String
+fileExtGray  = ".pgm" :: String
+fileExtColor = ".ppm" :: String
+
+tableWord8toDouble :: Vector R
+tableWord8toDouble = fromList [x | x <- [0..255], fromIntegral x / 256.0]
+
+--
+-- TYPES
+--
 
 class PoolClass p where
   {-
@@ -143,19 +162,23 @@ initSamplePool c (sx, sy) o p n = do
   OUT:
 -}
 
-initFilePool :: String -> Int -> IO Pool
-initFilePool path nc = do
+initFilePool :: String -> String -> Int -> IO Pool
+initFilePool path ext nc = do
   let classv = map (classNumToVec nc) [0..(nc-1)]
   flist <- forM [0..(nc-1)] $ \i -> do
     let dir = path ++ "/" ++ (show i) ++ "/"
     --files <- listDirectory dir
     files <- getDirectoryContents dir
-    let files' = map (makeImageFile i dir) $ filter (isSuffixOf ".dat") files
+    let files' = map (makeImageFile i dir) $ filter (isSuffixOf ext) files
     return files'
   return (FilePool flist nc classv)
   where
     makeImageFile :: Int -> String -> String -> ImageFile
     makeImageFile i dir fn = (i, dir ++ fn)
+
+{-
+  loadImage
+-}
 
 loadImage :: String -> IO Image
 loadImage fn = do
@@ -163,6 +186,18 @@ loadImage fn = do
   return $ case res of
     Left  e -> error ("read error:" ++ (show e))
     Right s -> read s :: Image
+
+loadImage2 :: String -> (Int, Int) -> Int -> IO Image
+loadImage fn (x, y) ch = do
+  res <- try $ B.readFile fn :: IO (Either SomeException String)
+  return $ case res of
+    Left  e -> error ("read error:" ++ (show e))
+    Right s -> buildImage s
+  where
+    buildImage :: String -> Image
+    buildImage str = reshape x dat
+      where
+        dat = map (\i -> tableWord8toDouble ! i) $ B.unpack str
 
 --
 -- PRIVATE FUNCTIONS
