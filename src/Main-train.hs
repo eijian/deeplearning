@@ -46,7 +46,7 @@ main = do
 
 train :: String -> IO ()
 train dn = do
-  putStrLn "Initializing..."
+  putStr "Initializing..."
   st <- loadStatus dn
 --  st <- loadStatus ""
   tm0 <- getCurrentTime
@@ -58,6 +58,7 @@ train dn = do
     getTests    = getImagesRandomly (poolE st) (testSz st)
     putF = putStatus tm0 st getTests
     loopFunc = trainLoop' getTeachers putF st
+  putStrLn ("done. (trained: " ++ (show $ counter st) ++ " images)")
   putStrLn ("Training the model... (#batch:" ++ (show (batchSz st * nclass st)) ++ ")")
   putF 0 (layers st)
   layers' <- foldM' loopFunc (layers st) [1 .. (repeatCt st)]
@@ -72,7 +73,7 @@ judge dn imf = do
   fh <- openFile imf ReadMode
   lst <- hGetContents fh
   forM_ (lines lst) $ \i -> do
-    im <- loadImage i
+    im <- datLoader i
     putStr (i ++ ",")
     let (y, _) = judgeImage (layers st) im
     forM_ (zip [0..] (toList y)) $ \(c, v) -> do
@@ -159,7 +160,7 @@ putStatus tm0 st getE i ls = do
   putStr (ite ++ acc)
   tm <- getCurrentTime
   putStrLn ("time = " ++ show (diffUTCTime tm tm0))
-  saveStatus st ls (batchSz st * i)
+  saveStatus st ls i
   --mapM_ putOne rs   -- for debug
   where
     putOne :: ([Double], Double) -> IO ()

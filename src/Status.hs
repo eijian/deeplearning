@@ -16,10 +16,12 @@ module Status (
 , savePt
 , poolT
 , poolE
+, counter
 ) where
 
 import Control.Exception
 import Control.Monad
+import Debug.Trace
 import Data.List
 
 import CNN.ActLayer
@@ -44,6 +46,7 @@ data Status = Status {
   , savePt   :: Int
   , poolT    :: Pool
   , poolE    :: Pool
+  , counter  :: Int
   }
 
 --
@@ -58,6 +61,9 @@ filterExt = ".filter"
 
 confFilename :: String
 confFilename = "config.yml"
+
+counterFilename :: String
+counterFilename = "counter"
 
 --
 -- FUNCTIONS
@@ -138,6 +144,7 @@ staticStatus = do
       , savePt   = 10
       , poolT    = pt
       , poolE    = pe
+      , counter  = 0
       }
 
   return stat
@@ -146,12 +153,19 @@ loadFromFile :: String -> IO Status
 loadFromFile dname = do
   ln <- readConfig (dname ++ "/" ++ confFilename)
   (((xr, yr), ch, cl, lr, bs, ts, rp, sp), ls0) <- parseConfig ((intercalate "\n" ln) ++ "\n")
-  --let ext = if ch == 1 then fileExtGray else fileExtColor
-  let ext = fileExtDat
+  let
+    ext = if ch == 1 then fileExtGray else fileExtColor
+    --ext = fileExtDat
+    --loader = datLoader
+    loader = pnmLoader (xr*yr*ch) xr ch
   ls <- makeLayer ls0
-  pt <- initFilePool (dname ++ "/teachers") ext cl
-  pe <- initFilePool (dname ++ "/tests")    ext cl
+  pt <- initFilePool (dname ++ "/teachers") ext cl loader
+  pe <- initFilePool (dname ++ "/tests")    ext cl loader
   fs <- forM [0..(length ls - 1)] $ \i -> readFilter (dname ++ filterDir) i
+  res <- try $ readFile (dname ++ filterDir ++ counterFilename) :: IO (Either SomeException String)
+  cnt <- case res of
+    Left  _ -> return 0
+    Right c -> return (read c :: Int)
 
   let
     ls' = zipWith readLayer ls fs
@@ -167,6 +181,7 @@ loadFromFile dname = do
       , savePt   = sp
       , poolT    = pt
       , poolE    = pe
+      , counter  = cnt
       }
 
   return stat
@@ -209,7 +224,9 @@ saveStatus st ls i = do
   --putStrLn ("saved to '" ++ (dirname st) ++ "'")
   let
     dir = (dirname st) ++ filterDir
+    cnt = counter st + batchSz st * nclass st * i
   zipWithM_ (writeFilter dir) [0..] ls
+  writeFile (dir ++ counterFilename) $ show cnt
 
 {-
 readFilter

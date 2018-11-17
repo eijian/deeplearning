@@ -42,6 +42,8 @@ executable train
                      , strict-io
                      , parsec
                      , parsec-numbers
+                     , bytestring
+                     , vector
   hs-source-dirs:      src
                      , .
   -- ghc-options:         -rtsopts -prof -auto-all -caf-all

@@ -19,4 +19,5 @@ main = doctest [
   , "CNN/Layer.hs"
   , "CNN/LayerType.hs"
   , "CNN/PoolLayer.hs"
+  , "src/Pool.hs"
   ]
