@@ -64,7 +64,7 @@ train dn = do
   layers' <- foldM' loopFunc (layers st) [1 .. (repeatCt st)]
 
   putStrLn "Saving status..."
-  saveStatus st layers' (repeatCt st * batchSz st)
+  saveStatus st layers' $ repeatCt st
   putStrLn "Finished!"
 
 judge :: String -> String -> IO ()
