@@ -35,7 +35,7 @@ def main
 
   @nsample.times do |i|
     cl = i % CLASS
-    fname = sprintf("#{cl}/%04d.pnm", i)
+    fname = sprintf("#{cl}/%04d.pgm", i)
     File.open(fname, 'w') do |fp|
       body = <<"EOF"
 P5
